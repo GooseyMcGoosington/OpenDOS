@@ -46,8 +46,8 @@ command.parse = function(str)
             _G.shell.text("UNAVAILABLE COMMAND", true)
         end
         if cmd == "HELP" then
-            for _, command in pairs(command.cmds) do
-                _G.shell.text("=> ", command, true)
+            for command, _ in pairs(command.cmds) do
+                _G.shell.text("=> ".. command, true)
             end
         end
         if cmd == "CLEAR" then
@@ -55,7 +55,7 @@ command.parse = function(str)
             _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
         end
         if cmd == "LCD" then
-            _G.shell.text("=> ", _G.filesystem.directory, true)
+            _G.shell.text("=> " .. _G.filesystem.directory, true)
         end
     else
         _G.shell.text("INVALID COMMAND", true)
