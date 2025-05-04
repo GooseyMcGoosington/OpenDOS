@@ -72,7 +72,7 @@ function keyboard.update(e, code, char, ascii)
         if code == 28 then
             -- enter
             keyboard.getLineAsString()
-            _G.shell.text("WORD => "..cLine_string, true)
+            --_G.shell.text("WORD => "..cLine_string, true)
             _G.package.command.parse(cLine_string)
             _G.shell.currentLine = _G.shell.currentLine + 1
             keyboard.x = 1

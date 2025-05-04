@@ -25,7 +25,7 @@ command.parse = function(str)
 
     if isInList(cmd, command.cmds) then
         if cmd == "LIST" then
-            _G.filesystem.list(parts[2])
+            _G.filesystem.list(parts[1])
         end
     else
         _G.shell.text("INVALID COMMAND", true)
