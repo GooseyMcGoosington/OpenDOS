@@ -148,7 +148,7 @@ if success and _G.shell.fault == -1 then
 	local success, _ = pcall(function()
 		_G.shell.text("Loading Lib", true)
 		_G.filesystem = dofile("/lib/filesystem.lua")
-		_G.shell.text(_G.shell.readChar(1, 1), true)
+		_G.shell.text(_G.shell.readChar(2, 2), true)
 	end)
 	if not success then
 		_G.shell.fault = 4
