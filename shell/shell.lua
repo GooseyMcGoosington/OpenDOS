@@ -151,6 +151,8 @@ local success, _ = pcall(function()
 	findComp()
 	vital()
 end)
+local timeout = 0.2
+local startTime = computer.uptime()
 if success and _G.shell.fault == -1 then
 	computer.beep(1500, 0.1)
 	_G.shell.text("Basic System Checks OK.", true)
@@ -172,17 +174,21 @@ if success and _G.shell.fault == -1 then
 		_G.filesystem.list(_G.filesystem.directory)
 		_G.filesystem.read(_G.filesystem.directory.."/hello_world.txt", true)
 	end
-	-- later I want to use the highest tier graphics card
 	while true do
-		local e, _, _, code = computer.pullSignal(0.2)
-		if _G.shell.fault > -1 then
-			_G.shell.panic()
-			return
+		local currentTime = computer.uptime()
+		local remainingTime = timeout - (currentTime - startTime)
+		if remainingTime <= 0 then
+		break
 		end
+	
+		local e, _, _, code = computer.pullSignal(remainingTime)
+		if e then
+		-- Handle the event
 		pcall(function()
 			_G.package.keyboard.update(e, code)
 		end)
 		_G.shell.text("Ping", true)
+		end
 	end
 else
 	_G.shell.sleep(0.1)
