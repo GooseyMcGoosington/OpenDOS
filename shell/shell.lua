@@ -167,7 +167,7 @@ if success and _G.shell.fault == -1 then
 	end
 	-- later I want to use the highest tier graphics card
 	while true do
-		local e, _, _, code = computer.pullSignal(0.04)
+		local e, _, _, code = computer.pullSignal(0.10)
 		if _G.shell.fault > -1 then
 			_G.shell.panic()
 			return
