@@ -172,7 +172,9 @@ if success and _G.shell.fault == -1 then
 			_G.shell.panic()
 			return
 		end
-		
+		pcall(function()
+			_G.package.keyboard.update(e, code)
+		end)
 	end
 else
 	_G.shell.sleep(0.1)
