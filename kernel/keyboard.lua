@@ -15,7 +15,7 @@ keyboard.update = function(e, code)
     if K % 3 == 0 then
         -- Restore previous cell
         if flashOn then
-            _G.shell.setColour(originalFg, originalBg)
+            _G.shell.setColour(0xFFFFFF, 0x0000FF)
             _G.invoke(gpu, "set", prevX, prevY, originalChar)
         end
 
