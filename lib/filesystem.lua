@@ -6,13 +6,13 @@ function fs.list(path)
     local entries = {}
 
     if type(path) ~= "string" then
-        _G.shell.text("Invalid path: expected string, got " .. type(path), true)
+        _G.shell.text("INVALID PATH" .. type(path), true)
         computer.beep(500, 0.1)
         return nil, "invalid path"
     end
     local ok, result = pcall(realfs.list, path)
     if not ok or not result then
-        _G.shell.text("Error listing => " .. path .. "/ " .. tostring(result), true)
+        _G.shell.text("ERROR LISTING => " .. path .. "/ " .. tostring(result), true)
         computer.beep(500, 0.1)
         return nil, result
     end
