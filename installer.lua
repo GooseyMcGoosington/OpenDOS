@@ -2,8 +2,8 @@ local component = require("component")
 local internet = require("internet")
 local fs = require("filesystem")
 
---io.write("Enter the path you want to write into: ")
-local basePath = "/mnt/6de"--io.read()
+io.write("Enter the path you want to write into: ")
+local basePath = "/mnt/"..io.read()
 io.write("Do you want to continue? The path " .. basePath .. " will be wiped. Please verify that THIS PATH is correct before proceeding! [Y/N]")
 if io.read():lower() == "y" then
     local function clearDirectory(path)
@@ -31,6 +31,7 @@ if io.read():lower() == "y" then
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/kernel/command.lua", path = basePath .. "/kernel/command.lua" },
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/lib/filesystem.lua", path = basePath .. "/lib/filesystem.lua" },
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/shell/shell.lua", path = basePath .. "/shell/shell.lua" },
+        { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/lib/utility.lua", path = basePath .. "/lib/utility.lua" },
       }
       
       for _, file in ipairs(files) do
