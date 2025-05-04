@@ -22,6 +22,29 @@ keyboard.update = function(e, code)
 
         flashOn = not flashOn
         K = 0
+
+        if code == 203 then
+            keyboard.x = keyboard.x - 1
+        end
+        if code == 205 then
+            keyboard.x = keyboard.x + 1
+        end
+        if code == 200 then
+            keyboard.y = keyboard.y - 1
+        end
+        if code == 208 then
+            keyboard.y = keyboard.y + 1
+        end
+        if keyboard.x < 1 then
+            keyboard.x = 1
+        elseif keyboard.x > _G.wh[1] then
+            keyboard.x = _G.wh[1]
+        end
+        if keyboard.y < 1 then
+            keyboard.y = 1
+        elseif keyboard.y > _G.wh[2] then
+            keyboard.y = _G.wh[2]
+        end
     end
 
     K = K + 1
