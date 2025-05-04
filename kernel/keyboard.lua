@@ -26,7 +26,16 @@ end
 -- Main update function: handle movement and writing
 function keyboard.update(e, code, char, ascii)
     local gpu = _G.bootgpu
-
+    if e == "key_down" and code == 28 then
+        -- enter
+        keyboard.getLineAsString()
+        --_G.shell.text("WORD => "..cLine_string, true)
+        _G.package.command.parse(cLine_string)
+        _G.shell.currentLine = _G.shell.currentLine + 1
+        keyboard.y = _G.shell.currentLine
+        keyboard.x = 1
+        return
+    end
     -- Clamp cursor to screen
     keyboard.x = math.max(1, math.min(keyboard.x, _G.wh[1]))
     keyboard.y = math.max(1, math.min(keyboard.y, _G.wh[2]))
@@ -61,23 +70,14 @@ function keyboard.update(e, code, char, ascii)
         lastY = keyboard.y
 
         -- Highlight new position
-        local char = _G.shell.readChar(keyboard.x, keyboard.y)
-        originalChar = char
+        local screenChar = _G.shell.readChar(keyboard.x, keyboard.y)
+        originalChar = screenChar
         _G.shell.setColour(0x000000, 0xFFFFFF)
-        _G.invoke(gpu, "set", keyboard.x, keyboard.y, char)
+        _G.invoke(gpu, "set", keyboard.x, keyboard.y, screenChar)
         _G.shell.setColour(0xFFFFFF, 0x0000FF)
     end
     -- be able to write to the screen buffer
     if char and e == "key_down" then
-        if code == 28 then
-            -- enter
-            keyboard.getLineAsString()
-            --_G.shell.text("WORD => "..cLine_string, true)
-            _G.package.command.parse(cLine_string)
-            _G.shell.currentLine = _G.shell.currentLine + 1
-            keyboard.x = 1
-            return
-        end
         if ascii >= 32 and ascii <= 126 then
             -- Write character at current cursor
             _G.shell.setColour(0xFFFFFF, 0x0000FF) -- white text, blue bg
