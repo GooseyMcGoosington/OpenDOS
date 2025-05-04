@@ -53,11 +53,14 @@ keyboard.update = function(e, code)
 end
 
 keyboard.getLineAsString = function()
-    local str = ""
-    for x = 1, _G.wh[1] do
-        str = str.._G.screenbuffer[x][_G.shell.currentLine]
-    end
-    cLine_string = str
+    pcall(function()
+        local str = ""
+        local y = _G.shell.currentLine
+        for x = 1, _G.wh[1] do
+            str = str.._G.screenbuffer[x][y]
+        end
+        cLine_string = str
+    end)
 end
 
 return keyboard

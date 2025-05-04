@@ -20,8 +20,10 @@ function fs.list(path)
         table.insert(entries, name)
         _G.shell.text("=> " .. path .. "/" .. name, true)
     end
-    _G.shell.currentLine = _G.shell.currentLine + 1
-    _G.package.keyboard.getLineAsString()
+    if _G.package.keyboard ~= nil then
+        _G.shell.currentLine = _G.shell.currentLine + 1
+        _G.package.keyboard.getLineAsString()
+    end
     return entries
 end
 
@@ -55,8 +57,10 @@ function fs.print_file(filePath)
     for line in buffer:gmatch("[^\r\n]+") do
         _G.shell.text(line, true)
     end
-    _G.shell.currentLine = _G.shell.currentLine + 1
-    _G.package.keyboard.getLineAsString()
+    if _G.package.keyboard ~= nil then
+        _G.shell.currentLine = _G.shell.currentLine + 1
+        _G.package.keyboard.getLineAsString()
+    end
 end
 
 function fs.read(path, print)
