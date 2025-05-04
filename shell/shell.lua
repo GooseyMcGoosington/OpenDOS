@@ -10,6 +10,9 @@ _G.wh = {0,0}
 _G.bootAddress=computer.getBootAddress()
 _G.invoke=component.invoke
 _G.filesystem = nil
+_G.package = {
+	keyboard=nil
+}
 _G.screenbuffer={}
 
 local faultCodes = {
@@ -149,7 +152,7 @@ if success and _G.shell.fault == -1 then
 		_G.shell.text("Loading Lib", true)
 		_G.filesystem = dofile("/lib/filesystem.lua")
 		_G.shell.text("Loading Kernel", true)
-		_G.filesystem = dofile("/kernel/keyboard.lua")
+		_G.package.keyboard = dofile("/kernel/keyboard.lua")
 	end)
 	if not success then
 		_G.shell.fault = 4
