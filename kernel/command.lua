@@ -46,7 +46,7 @@ command.parse = function(str)
             _G.shell.text("UNAVAILABLE COMMAND", true)
         end
         if cmd == "HELP" then
-            for command, _ in pairs(command.cmds) do
+            for _, command in pairs(command.cmds) do
                 _G.shell.text("=> ".. command, true)
             end
         end
