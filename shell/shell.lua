@@ -20,7 +20,8 @@ local faultCodes = {
 	[1] = "FATAL: System Fault",
 	[2] = "FATAL: Out of Memory",
 	[3] = "FATAL: Hardware Fault",
-	[4] = "SYSTEM: Software Load Failure"
+	[4] = "SYSTEM: Software Load Failure",
+	[5] = "KERNEL: Software Exception"
 }
 
 local shutdown = computer.shutdown
@@ -203,7 +204,7 @@ if success and _G.shell.fault == -1 then
 			_G.package.keyboard.update(e, code, char)
 		end)
 		if not success then
-			_G.shell.text(msg, true)
+			_G.shell.fault = 5
 		end
 		panicLowMem()
 	end

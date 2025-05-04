@@ -69,8 +69,9 @@ function keyboard.update(e, code, ascii)
     if ascii and e == "key_down" then
         if code == 28 then
             -- enter
+            keyboard.getLineAsString()
             _G.shell.text(cLine_string, true)
-            _G.shell.currentLine = _G.shell.currentLine + 1
+            --_G.shell.currentLine = _G.shell.currentLine + 1
             return
         end
         if code >= 32 and code <= 126 then
@@ -83,7 +84,6 @@ function keyboard.update(e, code, ascii)
                 local idx = (keyboard.y - 1) * _G.wh[1] + keyboard.x
                 _G.screenbuffer[idx] = ascii
             end
-            keyboard.getLineAsString()
             -- Move cursor right
             if code == 32 then
                 -- space
