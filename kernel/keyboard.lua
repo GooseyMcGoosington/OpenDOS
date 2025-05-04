@@ -7,6 +7,8 @@ local originalChar = " "
 local lastX, lastY = 1, 2
 keyboard.locked = true -- true means it can only write to the line, false means it can move about freely
 
+local cLine_string = ""
+
 keyboard.update = function(e, code)
     local gpu = _G.bootgpu
 
@@ -48,6 +50,14 @@ keyboard.update = function(e, code)
         
     end
     K = K + 1
+end
+
+keyboard.getLineAsString = function()
+    local str = ""
+    for x = 1, _G.wh[1] do
+        str = str.._G.screenbuffer[x][_G.shell.currentLine]
+    end
+    cLine_string = str
 end
 
 return keyboard
