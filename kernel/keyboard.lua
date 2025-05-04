@@ -22,7 +22,7 @@ function keyboard.getLineAsString()
 end
 
 -- Main update function: handle movement and writing
-function keyboard.update(e, code, ascii)
+function keyboard.update(e, code, char, ascii)
     local gpu = _G.bootgpu
 
     -- Clamp cursor to screen
@@ -66,29 +66,26 @@ function keyboard.update(e, code, ascii)
         _G.shell.setColour(0xFFFFFF, 0x0000FF)
     end
     -- be able to write to the screen buffer
-    if ascii and e == "key_down" then
-        if code == 28 then
+    if char and e == "key_down" then
+        if ascii == 28 then
             -- enter
             keyboard.getLineAsString()
+            _G.shell.currentLine = _G.shell.currentLine + 1
             _G.shell.text(cLine_string, true)
-            --_G.shell.currentLine = _G.shell.currentLine + 1
             return
         end
-        if code >= 32 and code <= 126 then
+        if ascii >= 32 and ascii <= 126 then
             -- Write character at current cursor
             _G.shell.setColour(0xFFFFFF, 0x0000FF) -- white text, blue bg
-            _G.invoke(gpu, "set", keyboard.x, keyboard.y, ascii)
+            _G.invoke(gpu, "set", keyboard.x, keyboard.y, char)
             
             -- Update internal screenbuffer if needed
             if _G.screenbuffer then
                 local idx = (keyboard.y - 1) * _G.wh[1] + keyboard.x
-                _G.screenbuffer[idx] = ascii
+                _G.screenbuffer[idx] = char
             end
             -- Move cursor right
-            if code == 32 then
-                -- space
-                keyboard.x = keyboard.x + 1
-            end
+            keyboard.x = keyboard.x + 1
             lastX = keyboard.x
             lastY = keyboard.y
         

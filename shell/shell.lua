@@ -201,7 +201,7 @@ if success and _G.shell.fault == -1 then
 			else
 				char = ""
 			end
-			_G.package.keyboard.update(e, code, char)
+			_G.package.keyboard.update(e, code, char, ascii)
 		end)
 		if not success then
 			_G.shell.fault = 5
