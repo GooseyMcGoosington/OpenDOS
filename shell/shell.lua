@@ -103,6 +103,11 @@ function _G.shell.writeChar(x, y, char)
 	local index = (y - 1) * w + x
 	_G.screenbuffer[index] = char
 end
+function _G.shell.readChar(x, y)
+	local w = _G.wh[1]
+	local index = (y - 1) * w + x
+	return _G.screenbuffer[index] or " "
+  end
 function _G.shell.sleep(seconds)
 	local deadline = computer.uptime() + seconds
 	repeat
@@ -143,6 +148,7 @@ if success and _G.shell.fault == -1 then
 	local success, _ = pcall(function()
 		_G.shell.text("Loading Lib", true)
 		_G.filesystem = dofile("/lib/filesystem.lua")
+		_G.shell.text(_G.shell.readChar(1, 1), true)
 	end)
 	if not success then
 		_G.shell.fault = 4
