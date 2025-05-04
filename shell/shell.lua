@@ -71,7 +71,7 @@ end
 function _G.shell.wipeScreenBuffer()
 	for x = 1, _G.wh[1] do
 		for y = 1, _G.wh[2] do
-			local idx = (y - 1) * w + x
+			local idx = (y - 1) * _G.wh[1] + x
 			_G.screenbuffer[idx] = " "
 		end
 	end
