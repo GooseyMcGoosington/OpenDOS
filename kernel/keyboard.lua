@@ -73,24 +73,29 @@ function keyboard.update(e, code, ascii)
             _G.shell.currentLine = _G.shell.currentLine + 1
             return
         end
-        -- Write character at current cursor
-        _G.shell.setColour(0xFFFFFF, 0x0000FF) -- white text, blue bg
-        _G.invoke(gpu, "set", keyboard.x, keyboard.y, ascii)
+        if code >= 32 and code <= 126 then
+            -- Write character at current cursor
+            _G.shell.setColour(0xFFFFFF, 0x0000FF) -- white text, blue bg
+            _G.invoke(gpu, "set", keyboard.x, keyboard.y, ascii)
+            
+            -- Update internal screenbuffer if needed
+            if _G.screenbuffer then
+                local idx = (keyboard.y - 1) * _G.wh[1] + keyboard.x
+                _G.screenbuffer[idx] = ascii
+            end
+            keyboard.getLineAsString()
+            -- Move cursor right
+            if code == 32 then
+                -- space
+                keyboard.x = keyboard.x + 1
+            end
+            lastX = keyboard.x
+            lastY = keyboard.y
         
-        -- Update internal screenbuffer if needed
-        if _G.screenbuffer then
-            local idx = (keyboard.y - 1) * _G.wh[1] + keyboard.x
-            _G.screenbuffer[idx] = ascii
+            -- Optional: draw a visual cursor at the new position (like an underscore or inverse space)
+            _G.clr()
+            _G.invoke(gpu, "set", keyboard.x, keyboard.y, "_")  -- use "_" or a space for cursor
         end
-        keyboard.getLineAsString()
-        -- Move cursor right
-        keyboard.x = keyboard.x + 1
-        lastX = keyboard.x
-        lastY = keyboard.y
-    
-        -- Optional: draw a visual cursor at the new position (like an underscore or inverse space)
-        _G.clr()
-        _G.invoke(gpu, "set", keyboard.x, keyboard.y, "_")  -- use "_" or a space for cursor
     end
     K = K + 1
 end
