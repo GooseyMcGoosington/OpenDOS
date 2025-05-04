@@ -194,8 +194,11 @@ if success and _G.shell.fault == -1 then
 		--_G.filesystem.directory = "./home" -- lists current directory
 		--_G.shell.text("Current Directory: ".._G.filesystem.directory, true)
 		--_G.filesystem.list(_G.filesystem.directory)
+		_G.filesystem.directory = "./home"
 		_G.filesystem.read(_G.filesystem.directory.."/hello_world.txt", true)
 		_G.shell.text(fMem(computer.freeMemory()) .. " OUT OF " .. fMem(computer.totalMemory()) .. " FREE", true)
+		_G.shell.text("OK.", true)
+		_G.shell.currentLine = _G.shell.currentLine + 1
 	end
 	-- later I want to use the highest tier graphics card
 	while true do
