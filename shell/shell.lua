@@ -185,11 +185,15 @@ if success and _G.shell.fault == -1 then
 		end
 		pcall(function()
 			_G.package.keyboard.update(e, code)
+			if _G.shell.currentLine > 20 then
+				_G.shell.currentLine = 1
+			end
 		end)
 		local used = (computer.totalMemory() - computer.freeMemory()) / computer.totalMemory()
 		if used >= 0.97 then
 			_G.shell.fault = 2
 			_G.shell.panic()
+			collectgarbage()
 		end
 		_G.shell.text(tostring(used), true)
 	end
