@@ -2,8 +2,8 @@ local component = require("component")
 local internet = require("internet")
 local fs = require("filesystem")
 
-io.write("Enter the path you want to write into: ")
-local basePath = io.read()
+--io.write("Enter the path you want to write into: ")
+local basePath = "/mnt/6de"--io.read()
 io.write("Do you want to continue? The path " .. basePath .. " will be wiped. Please verify that THIS PATH is correct before proceeding! [Y/N]")
 if io.read():lower() == "y" then
     local function clearDirectory(path)
@@ -25,11 +25,11 @@ if io.read():lower() == "y" then
         return
     end
     local files = {
-        { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/init.lua", path = basePath .. "/init.lua" },
-        { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/home/hello_world.txt", path = basePath .. "/home/hello_world.txt" },
-        { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/kernel/keyboard.lua", path = basePath .. "/kernel/keyboard.lua" },
-        { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/lib/filesystem.lua", path = basePath .. "/lib/filesystem.lua" },
-        { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/shell/shell.lua", path = basePath .. "/shell/shell.lua" },
+        { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/refs/heads/main/init.lua", path = basePath .. "/init.lua" },
+        { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/refs/heads/main/home/hello_world.txt", path = basePath .. "/home/hello_world.txt" },
+        { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/refs/heads/main/kernel/keyboard.lua", path = basePath .. "/kernel/keyboard.lua" },
+        { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/refs/heads/main/lib/filesystem.lua", path = basePath .. "/lib/filesystem.lua" },
+        { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/refs/heads/main/shell/shell.lua", path = basePath .. "/shell/shell.lua" },
       }
       
       for _, file in ipairs(files) do

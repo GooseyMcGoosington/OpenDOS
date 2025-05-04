@@ -2,23 +2,23 @@ local fs = {}
 fs.directory = "."
 local realfs = component.proxy(_G.bootAddress)
 
-fs.list = function(path)
+function fs.list(path)
     local entries = {}
 
     if type(path) ~= "string" then
-        --_G.shell.text("Invalid path: expected string, got " .. type(path), true)
+        _G.shell.text("Invalid path: expected string, got " .. type(path), true)
         computer.beep(500, 0.1)
         return nil, "invalid path"
     end
     local ok, result = pcall(realfs.list, path)
     if not ok or not result then
-        --_G.shell.text("Error listing => " .. path .. "/ " .. tostring(result), true)
+        _G.shell.text("Error listing => " .. path .. "/ " .. tostring(result), true)
         computer.beep(500, 0.1)
         return nil, result
     end
     for _, name in ipairs(result) do
         table.insert(entries, name)
-        --_G.shell.text("=> " .. path .. "/" .. name, true)
+        _G.shell.text("=> " .. path .. "/" .. name, true)
     end
 
     return entries
