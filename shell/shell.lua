@@ -10,6 +10,7 @@ _G.wh = {0,0}
 _G.bootAddress=computer.getBootAddress()
 _G.invoke=component.invoke
 _G.filesystem = nil
+_G.screenbuffer={}
 
 local faultCodes = {
 	[0] = "FATAL: Vital Fault",
@@ -57,6 +58,14 @@ function dofile(file)
 	end
 end
 
+function _G.shell.setScreenBuffer()
+	for x = 1, _G.wh[1] do
+		for y = 1, _G.wh[2] do
+			table.insert(_G.screenbuffer, 0)
+		end
+	end
+end
+
 function _G.shell.setColour(x, y)
 	local gpu = _G.bootgpu
 	invoke(gpu, "setForeground", x)
@@ -77,7 +86,11 @@ function _G.shell.text(str, setColour)
 		_G.shell.currentLine = _G.shell.currentLine + 1
 	end
 end
-
+function _G.shell.writeChar(x, y, char)
+	local w = _G.wh[1]
+	local index = (y - 1) * w + x
+	_G.screenbuffer[index] = char
+  end
 function _G.shell.sleep(seconds)
 	local deadline = computer.uptime() + seconds
 	repeat
@@ -105,6 +118,7 @@ function vital()
 	_G.wh = {w,h}
 	clr()
 	_G.shell.clear(1, 1, w, h, " ")
+	_G.shell.setScreenBuffer()
 end
 local success, _ = pcall(function()
 	findComp()
@@ -112,8 +126,8 @@ local success, _ = pcall(function()
 end)
 if success and _G.shell.fault == -1 then
 	computer.beep(1500, 0.1)
-	_G.shell.text("Basic System Checks OK.", true)
-	_G.shell.text("Please wait.", true)
+	--_G.shell.text("Basic System Checks OK.", true)
+	--_G.shell.text("Please wait.", true)
 	local success, _ = pcall(function()
 		_G.shell.text("Loading Lib", true)
 		_G.filesystem = dofile("/lib/filesystem.lua")
@@ -121,13 +135,13 @@ if success and _G.shell.fault == -1 then
 	if not success then
 		_G.shell.fault = 4
 	else
-		_G.shell.text("Finished Loading Software", true)
-		_G.shell.sleep(1)
-		_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
-		_G.filesystem.directory = "./home" -- lists current directory
-		_G.shell.text("Current Directory: ".._G.filesystem.directory, true)
-		_G.filesystem.list(_G.filesystem.directory)
-		_G.filesystem.read(_G.filesystem.directory.."/hello_world.txt", true)
+		--_G.shell.text("Finished Loading Software", true)
+		--_G.shell.sleep(1)
+		--_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
+		--_G.filesystem.directory = "./home" -- lists current directory
+		--_G.shell.text("Current Directory: ".._G.filesystem.directory, true)
+		--_G.filesystem.list(_G.filesystem.directory)
+		--_G.filesystem.read(_G.filesystem.directory.."/hello_world.txt", true)
 		--[[_G.shell.text(tostring(_G.filesystem.exists("shell/")), true)
 		_G.shell.text(tostring(_G.filesystem.isDirectory("shell/")), true)
 		_G.shell.text(tostring(_G.filesystem.size("shell/shell.lua")), true)]]
