@@ -143,34 +143,33 @@ local success, _ = pcall(function()
 end)
 if success and _G.shell.fault == -1 then
 	computer.beep(1500, 0.1)
-	--_G.shell.text("Basic System Checks OK.", true)
-	--_G.shell.text("Please wait.", true)
+	_G.shell.text("Basic System Checks OK.", true)
+	_G.shell.text("Please wait.", true)
 	local success, _ = pcall(function()
 		_G.shell.text("Loading Lib", true)
 		_G.filesystem = dofile("/lib/filesystem.lua")
-		_G.shell.text(_G.shell.readChar(1, 2), true)
+		_G.shell.text("Loading Kernel", true)
+		_G.filesystem = dofile("/kernel/keyboard.lua")
 	end)
 	if not success then
 		_G.shell.fault = 4
 	else
-		--_G.shell.text("Finished Loading Software", true)
-		--_G.shell.sleep(1)
-		--_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
-		--_G.filesystem.directory = "./home" -- lists current directory
-		--_G.shell.text("Current Directory: ".._G.filesystem.directory, true)
-		--_G.filesystem.list(_G.filesystem.directory)
-		--_G.filesystem.read(_G.filesystem.directory.."/hello_world.txt", true)
-		--[[_G.shell.text(tostring(_G.filesystem.exists("shell/")), true)
-		_G.shell.text(tostring(_G.filesystem.isDirectory("shell/")), true)
-		_G.shell.text(tostring(_G.filesystem.size("shell/shell.lua")), true)]]
+		_G.shell.text("Finished Loading Software", true)
+		_G.shell.sleep(1)
+		_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
+		_G.filesystem.directory = "./home" -- lists current directory
+		_G.shell.text("Current Directory: ".._G.filesystem.directory, true)
+		_G.filesystem.list(_G.filesystem.directory)
+		_G.filesystem.read(_G.filesystem.directory.."/hello_world.txt", true)
 	end
 	-- later I want to use the highest tier graphics card
 	while true do
 		local e, _, _, code = computer.pullSignal()
 		if _G.shell.fault > -1 then
 			_G.shell.panic()
-			break
+			return
 		end
+		
 	end
 else
 	_G.shell.sleep(0.1)

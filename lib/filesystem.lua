@@ -52,7 +52,7 @@ function fs.print_file(filePath)
     realfs.close(handle)
 
     for line in buffer:gmatch("[^\r\n]+") do
-        --_G.shell.text(line, true)
+        _G.shell.text(line, true)
     end
 end
 
