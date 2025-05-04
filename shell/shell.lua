@@ -186,11 +186,12 @@ if success and _G.shell.fault == -1 then
 		pcall(function()
 			_G.package.keyboard.update(e, code)
 		end)
-		local used = computer.freeMemory()/computer.totalMemory()
+		local used = (computer.totalMemory() - computer.freeMemory()) / computer.totalMemory()
 		if used >= 0.99 then
 			_G.shell.fault = 2
+			_G.shell.panic()
 		end
-		_G.shell.text("Pingbongbongping :D", true)
+		_G.shell.text(tostring(used), true)
 	end
 else
 	_G.shell.sleep(0.1)
