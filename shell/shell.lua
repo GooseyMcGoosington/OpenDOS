@@ -205,7 +205,11 @@ if success and _G.shell.fault == -1 then
 		end)
 		if not success then
 			_G.shell.fault = 5
+			_G.shell.panic()
 		end
+		if _G.shell.currentLine >= _G.wh[2] then
+            _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], "")
+        end
 		panicLowMem()
 	end
 else

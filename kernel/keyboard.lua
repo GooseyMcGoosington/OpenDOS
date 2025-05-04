@@ -14,8 +14,10 @@ function keyboard.getLineAsString()
     pcall(function()
         local str = ""
         local y = _G.shell.currentLine
-        for x = 1, _G.wh[1] do
-            str = str .. _G.screenbuffer[x][y]
+        local w = _G.wh[1]
+        for x = 1, w do
+            local idx = (y - 1) * w + x
+            str = str .. _G.screenbuffer[idx]
         end
         cLine_string = str
     end)
@@ -67,11 +69,12 @@ function keyboard.update(e, code, char, ascii)
     end
     -- be able to write to the screen buffer
     if char and e == "key_down" then
-        if ascii == 28 then
+        if code == 28 then
             -- enter
             keyboard.getLineAsString()
+            _G.shell.text("WORD => "..cLine_string, true)
             _G.shell.currentLine = _G.shell.currentLine + 1
-            _G.shell.text(cLine_string, true)
+            keyboard.x = 1
             return
         end
         if ascii >= 32 and ascii <= 126 then
