@@ -208,7 +208,8 @@ if success and _G.shell.fault == -1 then
 			_G.shell.panic()
 		end
 		if _G.shell.currentLine >= _G.wh[2] then
-            _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], "")
+			_G.shell.setColour(0xFFFFFF, 0xFF0000)
+            _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
         end
 		panicLowMem()
 	end
