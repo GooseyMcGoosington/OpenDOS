@@ -167,13 +167,13 @@ if success and _G.shell.fault == -1 then
 	end
 	-- later I want to use the highest tier graphics card
 	while true do
-		local e, _, _, code = computer.pullSignal()
+		local e, a1, a2, a3, a4, a5 = computer.pullSignal(0.04)
 		if _G.shell.fault > -1 then
 			_G.shell.panic()
 			return
 		end
 		pcall(function()
-			_G.package.keyboard.update(e, code)
+			_G.package.keyboard.update(e, a4)
 		end)
 	end
 else
