@@ -71,7 +71,8 @@ end
 function _G.shell.wipeScreenBuffer()
 	for x = 1, _G.wh[1] do
 		for y = 1, _G.wh[2] do
-			_G.screenbuffer[x+y] = " "
+			local idx = (y - 1) * w + x
+			_G.screenbuffer[idx] = " "
 		end
 	end
 end
@@ -129,6 +130,8 @@ function _G.shell.panic()
 	_G.shell.setColour(0xFFFFFF, 0xFF0000)
 	_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
 	_G.shell.text(faultCodes[_G.shell.fault], false)
+	_G.shell.text("Panic triggered to prevent system damage.", false)
+	_G.shell.text("Crash Dump will be located in ./home", false)
 	_G.shell.text("This system will shutdown in 5 seconds.", false)
 	_G.shell.sleep(5)
 	computer.shutdown(false)
@@ -183,6 +186,10 @@ if success and _G.shell.fault == -1 then
 		pcall(function()
 			_G.package.keyboard.update(e, code)
 		end)
+		local used = computer.freeMemory()/computer.totalMemory()
+		if used >= 0.993 then
+			_G.shell.fault = 2
+		end
 	end
 else
 	_G.shell.sleep(0.1)
