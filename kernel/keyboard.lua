@@ -5,6 +5,7 @@ keyboard.y = 2
 local K = 0
 local originalChar = " "
 local lastX, lastY = 1, 2
+keyboard.locked = true -- true means it can only write to the line, false means it can move about freely
 
 keyboard.update = function(e, code)
     local gpu = _G.bootgpu
@@ -23,10 +24,15 @@ keyboard.update = function(e, code)
             keyboard.x = keyboard.x - 1
         elseif code == 205 then
             keyboard.x = keyboard.x + 1
-        elseif code == 200 then
-            keyboard.y = keyboard.y - 1
-        elseif code == 208 then
-            keyboard.y = keyboard.y + 1
+        end
+        if not keyboard.locked then
+            if code == 200 then
+                keyboard.y = keyboard.y - 1
+            elseif code == 208 then
+                keyboard.y = keyboard.y + 1
+            end
+        else
+            keyboard.y = _G.shell.currentLine 
         end
         _G.shell.setColour(0xFFFFFF, 0x0000FF)
         _G.invoke(gpu, "set", lastX, lastY, originalChar)
