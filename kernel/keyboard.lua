@@ -7,7 +7,6 @@ local K = 0
 
 local prevX, prevY = keyboard.x, keyboard.y
 local originalChar = " "
-local originalFg, originalBg = 0xFFFFFF, 0x0000FF
 
 keyboard.update = function(e, code)
     local gpu = _G.bootgpu
@@ -15,7 +14,7 @@ keyboard.update = function(e, code)
     if K % 3 == 0 then
         -- Restore previous cell
         if flashOn then
-            _G.shell.setColour(0xFFFFFF, 0x0000FF)
+            _G.shell.setColour(0xFFFFFF, 0x0000FF) -- White text on blue bg
             _G.invoke(gpu, "set", prevX, prevY, originalChar)
         end
 
@@ -34,16 +33,18 @@ keyboard.update = function(e, code)
         keyboard.x = math.max(1, math.min(keyboard.x, _G.wh[1]))
         keyboard.y = math.max(1, math.min(keyboard.y, _G.wh[2]))
 
-        -- Store current state
+        -- Store current position and character
         prevX, prevY = keyboard.x, keyboard.y
         originalChar = _G.shell.readChar(keyboard.x, keyboard.y) or " "
-        originalFg, originalBg = _G.shell.getColour()
 
-        -- Draw cursor
-        local fg, bg = 0x0000FF, 0xFFFFFF
+        -- Flashing cursor logic
+        local fg, bg
         if flashOn then
-            fg, bg = 0xFFFFFF, 0x0000FF
+            fg, bg = 0x000000, 0xFFFFFF -- Black text on white
+        else
+            fg, bg = 0xFFFFFF, 0x0000FF -- White text on blue
         end
+
         _G.shell.setColour(fg, bg)
         _G.invoke(gpu, "set", keyboard.x, keyboard.y, originalChar)
 
