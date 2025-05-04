@@ -150,6 +150,14 @@ function vital()
 	_G.shell.clear(1, 1, w, h, " ")
 	_G.shell.setScreenBuffer()
 end
+function panicLowMem()
+	local used = (computer.totalMemory() - computer.freeMemory()) / computer.totalMemory()
+	if used >= 0.93 then
+		_G.shell.fault = 2
+		_G.shell.panic()
+		collectgarbage()
+	end
+end
 local success, _ = pcall(function()
 	findComp()
 	vital()
@@ -178,24 +186,16 @@ if success and _G.shell.fault == -1 then
 	end
 	-- later I want to use the highest tier graphics card
 	while true do
-		local e, _, _, code = computer.pullSignal(0.2)
+		local e, _, _, code = computer.pullSignal(0.05)
+		panicLowMem()
 		if _G.shell.fault > -1 then
 			_G.shell.panic()
 			return
 		end
 		pcall(function()
 			_G.package.keyboard.update(e, code)
-			if _G.shell.currentLine > 20 then
-				_G.shell.currentLine = 1
-			end
 		end)
-		local used = (computer.totalMemory() - computer.freeMemory()) / computer.totalMemory()
-		if used >= 0.97 then
-			_G.shell.fault = 2
-			_G.shell.panic()
-			collectgarbage()
-		end
-		_G.shell.text(tostring(used), true)
+		panicLowMem()
 	end
 else
 	_G.shell.sleep(0.1)
