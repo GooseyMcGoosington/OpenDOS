@@ -187,9 +187,10 @@ if success and _G.shell.fault == -1 then
 			_G.package.keyboard.update(e, code)
 		end)
 		local used = computer.freeMemory()/computer.totalMemory()
-		if used >= 0.993 then
+		if used >= 0.99 then
 			_G.shell.fault = 2
 		end
+		_G.shell.text("Pingbongbongping :D", true)
 	end
 else
 	_G.shell.sleep(0.1)
