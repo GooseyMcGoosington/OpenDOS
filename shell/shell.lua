@@ -75,7 +75,7 @@ function _G.shell.clear(x0, y0, x1, y1, str)
 	invoke(_G.bootgpu, "fill", x0, y0, x1, y1, str)	
 	_G.shell.currentLine=1 -- Return to 1
 end
-function _G.shell.text(str, setColour)
+--[[function _G.shell.text(str, setColour)
 	if setColour then
 		_G.shell.setColour(0xFFFFFF, 0x0000FF)
 		invoke(_G.bootgpu, "set", 1, _G.shell.currentLine + 1, str)	
@@ -85,12 +85,24 @@ function _G.shell.text(str, setColour)
 		invoke(_G.bootgpu, "set", 1, _G.shell.currentLine + 1, str)	
 		_G.shell.currentLine = _G.shell.currentLine + 1
 	end
-end
+end]]
+function _G.shell.text(str, setColour)
+	local x = 1
+	local y = _G.shell.currentLine + 1
+	if setColour then
+		_G.shell.setColour(0xFFFFFF, 0x0000FF)
+	end
+	invoke(_G.bootgpu, "set", x, y, str)
+	for i = 1, #str do
+		_G.shell.writeChar(x + i - 1, y, str:sub(i, i))
+	end
+	_G.shell.currentLine = y
+end  
 function _G.shell.writeChar(x, y, char)
 	local w = _G.wh[1]
 	local index = (y - 1) * w + x
 	_G.screenbuffer[index] = char
-  end
+end
 function _G.shell.sleep(seconds)
 	local deadline = computer.uptime() + seconds
 	repeat
