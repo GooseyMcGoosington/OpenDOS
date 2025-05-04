@@ -70,8 +70,10 @@ function _G.shell.setScreenBuffer()
 end
 function _G.shell.wipeScreenBuffer()
 	for x = 1, _G.wh[1] do
-		for y = 1, _G.wh[2] do
-			_G.screenbuffer[x][y] = 0
+		if _G.screenbuffer[x] ~= nil then
+			for y = 1, _G.wh[2] do
+				_G.screenbuffer[x][y] = 0
+			end
 		end
 	end
 end
