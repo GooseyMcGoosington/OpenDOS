@@ -172,6 +172,7 @@ if success and _G.shell.fault == -1 then
 		_G.filesystem = dofile("/lib/filesystem.lua")
 		_G.shell.text("Loading Kernel", true)
 		_G.package.keyboard = dofile("/kernel/keyboard.lua")
+		_G.package.command = dofile("/kernel/command.lua")
 	end)
 	if not success then
 		_G.shell.fault = 4
@@ -192,9 +193,18 @@ if success and _G.shell.fault == -1 then
 			_G.shell.panic()
 			return
 		end
-		pcall(function()
-			_G.package.keyboard.update(e, code, string.char(ascii))
+		local success, msg = pcall(function()
+			local char = ascii ~= nil
+			if char then
+				char = string.char(ascii)
+			else
+				char = ""
+			end
+			_G.package.keyboard.update(e, code, char)
 		end)
+		if not success then
+			_G.shell.text(msg, true)
+		end
 		panicLowMem()
 	end
 else

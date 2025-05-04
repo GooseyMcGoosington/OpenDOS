@@ -2,85 +2,97 @@ local keyboard = {}
 
 keyboard.x = 1
 keyboard.y = 2
+local K = 0
 local originalChar = " "
 local lastX, lastY = 1, 2
-keyboard.locked = true -- true: remain on current input line, false: free movement
+keyboard.locked = true -- true means it can only write to the line, false means it can move about freely
 
 local cLine_string = ""
 
--- Capture the current shell line into cLine_string
+-- Utility to capture the current line as string
 function keyboard.getLineAsString()
     pcall(function()
         local str = ""
         local y = _G.shell.currentLine
         for x = 1, _G.wh[1] do
-            str = str .. (_G.screenbuffer[x][y] or " ")
+            str = str .. _G.screenbuffer[x][y]
         end
         cLine_string = str
     end)
 end
 
--- Highlight a cell at (x,y) with inverted colors
-local function highlight(x, y)
-    local ch = _G.shell.readChar(x, y)
-    _G.shell.setColour(0x000000, 0xFFFFFF)
-    _G.invoke(_G.bootgpu, "set", x, y, ch)
-    return ch
-end
-
--- Restore a cell at (x,y) to its original character and colors
-local function restore(x, y, ch)
-    _G.shell.setColour(0xFFFFFF, 0x0000FF)
-    _G.invoke(_G.bootgpu, "set", x, y, ch)
-end
-
--- Main update: handle arrows and ASCII input
+-- Main update function: handle movement and writing
 function keyboard.update(e, code, ascii)
-    -- Movement: arrow keys
-    if code == 203 or code == 205 or code == 200 or code == 208 then
-        -- Clear previous highlight
-        restore(lastX, lastY, originalChar)
+    local gpu = _G.bootgpu
 
-        -- Compute new position
-        if code == 203 then keyboard.x = keyboard.x - 1
-        elseif code == 205 then keyboard.x = keyboard.x + 1 end
+    -- Clamp cursor to screen
+    keyboard.x = math.max(1, math.min(keyboard.x, _G.wh[1]))
+    keyboard.y = math.max(1, math.min(keyboard.y, _G.wh[2]))
+
+    -- Restore previous character highlight
+    originalChar = _G.shell.readChar(keyboard.x, keyboard.y)
+    _G.shell.setColour(0xFFFFFF, 0x0000FF)
+    _G.invoke(gpu, "set", keyboard.x, keyboard.y, originalChar)
+
+    if K % 3 == 0 then
+        -- Arrow key movement
+        if code == 203 then
+            keyboard.x = keyboard.x - 1
+        elseif code == 205 then
+            keyboard.x = keyboard.x + 1
+        end
         if not keyboard.locked then
-            if code == 200 then keyboard.y = keyboard.y - 1
-            elseif code == 208 then keyboard.y = keyboard.y + 1 end
+            if code == 200 then
+                keyboard.y = keyboard.y - 1
+            elseif code == 208 then
+                keyboard.y = keyboard.y + 1
+            end
         else
+            -- Stay on current input line
             keyboard.y = _G.shell.currentLine
         end
 
-        -- Clamp
-        keyboard.x = math.max(1, math.min(keyboard.x, _G.wh[1]))
-        keyboard.y = math.max(1, math.min(keyboard.y, _G.wh[2]))
+        -- Restore last position
+        _G.shell.setColour(0xFFFFFF, 0x0000FF)
+        _G.invoke(gpu, "set", lastX, lastY, originalChar)
+        lastX = keyboard.x
+        lastY = keyboard.y
 
-        -- Highlight new position and store state
-        originalChar = highlight(keyboard.x, keyboard.y)
-        lastX, lastY = keyboard.x, keyboard.y
-
-    -- ASCII input: single character strings
-    elseif ascii and #ascii == 1 then
-        -- Restore highlight area before writing
-        restore(keyboard.x, keyboard.y, originalChar)
-
-        -- Write the character
+        -- Highlight new position
+        local char = _G.shell.readChar(keyboard.x, keyboard.y)
+        originalChar = char
         _G.shell.setColour(0x000000, 0xFFFFFF)
-        _G.invoke(_G.bootgpu, "set", keyboard.x, keyboard.y, ascii)
-        if _G.screenbuffer then _G.screenbuffer[keyboard.x][keyboard.y] = ascii end
-
-        -- Move cursor right and update line string
-        keyboard.x = keyboard.x + 1
-        keyboard.getLineAsString()
-
-        -- Clamp
-        keyboard.x = math.max(1, math.min(keyboard.x, _G.wh[1]))
-        keyboard.y = _G.shell.currentLine
-
-        -- Highlight new cursor
-        originalChar = highlight(keyboard.x, keyboard.y)
-        lastX, lastY = keyboard.x, keyboard.y
+        _G.invoke(gpu, "set", keyboard.x, keyboard.y, char)
+        _G.shell.setColour(0xFFFFFF, 0x0000FF)
     end
+    -- be able to write to the screen buffer
+    if ascii and e == "key_down" then
+        if code == 28 then
+            -- enter
+            _G.shell.text(cLine_string, true)
+            _G.shell.currentLine = _G.shell.currentLine + 1
+            return
+        end
+        -- Write character at current cursor
+        _G.shell.setColour(0xFFFFFF, 0x0000FF) -- white text, blue bg
+        _G.invoke(gpu, "set", keyboard.x, keyboard.y, ascii)
+        
+        -- Update internal screenbuffer if needed
+        if _G.screenbuffer then
+            local idx = (keyboard.y - 1) * _G.wh[1] + keyboard.x
+            _G.screenbuffer[idx] = ascii
+        end
+        keyboard.getLineAsString()
+        -- Move cursor right
+        keyboard.x = keyboard.x + 1
+        lastX = keyboard.x
+        lastY = keyboard.y
+    
+        -- Optional: draw a visual cursor at the new position (like an underscore or inverse space)
+        _G.clr()
+        _G.invoke(gpu, "set", keyboard.x, keyboard.y, "_")  -- use "_" or a space for cursor
+    end
+    K = K + 1
 end
 
 return keyboard
