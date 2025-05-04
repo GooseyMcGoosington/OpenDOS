@@ -10,7 +10,9 @@ _G.bootAddress=computer.getBootAddress()
 _G.invoke=component.invoke
 _G.filesystem = nil
 _G.package = {
-	keyboard=nil
+	keyboard=nil,
+	command=nil,
+	utility=nil
 }
 _G.screenbuffer={}
 local faultCodes = {
@@ -56,10 +58,10 @@ function dofile(file)
 	end
 end
 function _G.shell.setScreenBuffer()
-	for x = 1, _G.wh[1] do
-		for y = 1, _G.wh[2] do
-			table.insert(_G.screenbuffer, " ")
-		end
+	local width, height = _G.wh[1], _G.wh[2]
+	_G.screenbuffer = {} -- Reset the buffer
+	for i = 1, width * height do
+		_G.screenbuffer[i] = " "
 	end
 end
 function _G.shell.wipeScreenBuffer()
@@ -173,15 +175,6 @@ local success, _ = pcall(function()
 	findComp()
 	vital()
 end)
-local function fMem(mem)
-	local units = {"B", "KiB", "MiB", "GiB"}
-	local unit = 1
-	while mem > 1024 and units[unit] do
-		unit = unit + 1
-		mem = mem/1024
-	end
-	return mem.." "..units[unit]
-end
 if success and _G.shell.fault == -1 then
 	computer.beep(1500, 0.1)
 	_G.shell.text("Basic System Checks OK.", true)
@@ -189,6 +182,7 @@ if success and _G.shell.fault == -1 then
 	local success, _ = pcall(function()
 		_G.shell.text("Loading Lib", true)
 		_G.filesystem = dofile("/lib/filesystem.lua")
+		_G.package.utility = dofile("/lib/utility.lua")
 		_G.shell.text("Loading Kernel", true)
 		_G.package.keyboard = dofile("/kernel/keyboard.lua")
 		_G.package.command = dofile("/kernel/command.lua")
@@ -201,7 +195,7 @@ if success and _G.shell.fault == -1 then
 		_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
 		_G.filesystem.directory = "./home"
 		_G.filesystem.read(_G.filesystem.directory.."/hello_world.txt", true)
-		_G.shell.text(fMem(computer.freeMemory()) .. " OUT OF " .. fMem(computer.totalMemory()) .. " FREE", true)
+		_G.shell.text(_G.package.utility.fMem(computer.freeMemory()) .. " OUT OF " .. _G.package.utility.fMem(computer.totalMemory()) .. " FREE", true)
 		_G.shell.text("OK.", true)
 		_G.shell.currentLine = _G.shell.currentLine + 1
 	end

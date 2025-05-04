@@ -6,7 +6,8 @@ command.cmds = {
     "RUN",
     "HELP",
     "CLEAR",
-    "LCD"
+    "LCD",
+    "REPORT"
 }
 local function isInList(val, list)
     for _, v in ipairs(list) do
@@ -52,6 +53,9 @@ command.parse = function(str)
         end
         if cmd == "LCD" then
             _G.shell.text("=> " .. _G.filesystem.directory, true)
+        end
+        if cmd == "REPORT" then
+            _G.package.utility.report()
         end
     else
         _G.shell.text("INVALID COMMAND", true)
