@@ -8,18 +8,14 @@ command.cmds = {
     "CLEAR",
     "LCD"
 }
-
--- Helper: check if a value is in a list
 local function isInList(val, list)
     for _, v in ipairs(list) do
         if v == val then return true end
     end
     return false
 end
-
--- Parse a command string into {command = ..., args = {...}}
 command.parse = function(str)
-    str = str:match("^%s*(.-)%s*$") -- trim
+    str = str:match("^%s*(.-)%s*$")
     local parts = {}
     for word in str:gmatch("%S+") do
         table.insert(parts, word)

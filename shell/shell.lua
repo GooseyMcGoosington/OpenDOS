@@ -1,5 +1,4 @@
 local invoke=component.invoke
-
 _G.gpu = {}
 _G.screen = {}
 _G.components = {}
@@ -14,7 +13,6 @@ _G.package = {
 	keyboard=nil
 }
 _G.screenbuffer={}
-
 local faultCodes = {
 	[0] = "FATAL: Vital Fault",
 	[1] = "FATAL: System Fault",
@@ -23,7 +21,6 @@ local faultCodes = {
 	[4] = "SYSTEM: Software Load Failure",
 	[5] = "KERNEL: Software Exception"
 }
-
 local shutdown = computer.shutdown
 computer.shutdown = function(reboot)
 	if os.sleep then
@@ -32,7 +29,6 @@ computer.shutdown = function(reboot)
 	end
 	shutdown(reboot)
 end
-
 function findComp()
 	for address, ctype in component.list() do
 		if ctype == "gpu" then
@@ -44,9 +40,7 @@ function findComp()
 		end
 	end
 end
-
 local loadfile = ...
-
 function dofile(file)
 	_G.shell.text("=> "..file, true)
 	local program, reason = loadfile(file)
@@ -61,7 +55,6 @@ function dofile(file)
 		_G.shell.fault = 4
 	end
 end
-
 function _G.shell.setScreenBuffer()
 	for x = 1, _G.wh[1] do
 		for y = 1, _G.wh[2] do
@@ -87,17 +80,6 @@ function _G.shell.clear(x0, y0, x1, y1, str)
 	_G.shell.currentLine=1 -- Return to 1
 	_G.shell.wipeScreenBuffer()
 end
---[[function _G.shell.text(str, setColour)
-	if setColour then
-		_G.shell.setColour(0xFFFFFF, 0x0000FF)
-		invoke(_G.bootgpu, "set", 1, _G.shell.currentLine + 1, str)	
-		clr()
-		_G.shell.currentLine = _G.shell.currentLine + 1
-	else
-		invoke(_G.bootgpu, "set", 1, _G.shell.currentLine + 1, str)	
-		_G.shell.currentLine = _G.shell.currentLine + 1
-	end
-end]]
 function _G.shell.text(str, setColour)
 	local x = 1
 	local y = _G.shell.currentLine + 1
@@ -112,14 +94,42 @@ function _G.shell.text(str, setColour)
 end  
 function _G.shell.writeChar(x, y, char)
 	local w = _G.wh[1]
+	local h = _G.wh[2]
+
+	if x < 1 then
+		x = 1
+	end
+	if x > w then
+		x = w
+	end
+	if y < 1 then
+		y = 1
+	end
+	if y > h then
+		y = h
+	end
 	local index = (y - 1) * w + x
 	_G.screenbuffer[index] = char
 end
 function _G.shell.readChar(x, y)
 	local w = _G.wh[1]
+	local h = _G.wh[2]
+
+	if x < 1 then
+		x = 1
+	end
+	if x > w then
+		x = w
+	end
+	if y < 1 then
+		y = 1
+	end
+	if y > h then
+		y = h
+	end
 	local index = (y - 1) * w + x
 	return _G.screenbuffer[index] or " "
-  end
+end
 function _G.shell.sleep(seconds)
 	local deadline = computer.uptime() + seconds
 	repeat
@@ -141,8 +151,8 @@ function clr()
 	_G.shell.setColour(0x000000, 0x0000FF)
 end
 function vital()
-	_G.bootgpu = component.list("gpu")() -- get the first GPU available
-	_G.bootscreen = component.list("screen")() -- get the first screen available
+	_G.bootgpu = component.list("gpu")()
+	_G.bootscreen = component.list("screen")()
 	invoke(_G.bootgpu, "bind", _G.bootscreen)
 
 	local w, h = invoke(_G.bootgpu, "getResolution")
@@ -163,7 +173,6 @@ local success, _ = pcall(function()
 	findComp()
 	vital()
 end)
-
 local function fMem(mem)
 	local units = {"B", "KiB", "MiB", "GiB"}
 	local unit = 1
@@ -173,7 +182,6 @@ local function fMem(mem)
 	end
 	return mem.." "..units[unit]
 end
-
 if success and _G.shell.fault == -1 then
 	computer.beep(1500, 0.1)
 	_G.shell.text("Basic System Checks OK.", true)
@@ -191,9 +199,6 @@ if success and _G.shell.fault == -1 then
 		_G.shell.text("Finished Loading Software", true)
 		_G.shell.sleep(1)
 		_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
-		--_G.filesystem.directory = "./home" -- lists current directory
-		--_G.shell.text("Current Directory: ".._G.filesystem.directory, true)
-		--_G.filesystem.list(_G.filesystem.directory)
 		_G.filesystem.directory = "./home"
 		_G.filesystem.read(_G.filesystem.directory.."/hello_world.txt", true)
 		_G.shell.text(fMem(computer.freeMemory()) .. " OUT OF " .. fMem(computer.totalMemory()) .. " FREE", true)

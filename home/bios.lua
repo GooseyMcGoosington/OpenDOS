@@ -110,14 +110,12 @@ local function bootload(a)
     txt("BOOTSTRAPPER FAULT: " .. tostring(reason), 4)
     return
   end
-
   local content = ""
   repeat
     local chunk = fs.read(handle, math.huge)
     content = content .. (chunk or "")
   until not chunk
   fs.close(handle)
-
   local result, err = load(content, "=init.lua", "t", _G)
   if not result then
     txt("DISK ERROR: " .. tostring(err), 5)
