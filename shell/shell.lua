@@ -68,7 +68,13 @@ function _G.shell.setScreenBuffer()
 		end
 	end
 end
-
+function _G.shell.wipeScreenBuffer()
+	for x = 1, _G.wh[1] do
+		for y = 1, _G.wh[2] do
+			_G.screenbuffer[x][y] = 0
+		end
+	end
+end
 function _G.shell.setColour(x, y)
 	local gpu = _G.bootgpu
 	invoke(gpu, "setForeground", x)
@@ -77,6 +83,7 @@ end
 function _G.shell.clear(x0, y0, x1, y1, str)
 	invoke(_G.bootgpu, "fill", x0, y0, x1, y1, str)	
 	_G.shell.currentLine=1 -- Return to 1
+	_G.shell.wipeScreenBuffer()
 end
 --[[function _G.shell.text(str, setColour)
 	if setColour then

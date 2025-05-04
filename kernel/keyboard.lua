@@ -6,19 +6,17 @@ local flashOn = false
 local K = 0
 
 local prevX, prevY = keyboard.x, keyboard.y
-local originalChar = " "
+local originalChar = _G.shell.readChar(keyboard.x, keyboard.y) or " "
 
 keyboard.update = function(e, code)
     local gpu = _G.bootgpu
 
     if K % 3 == 0 then
-        -- Restore previous cell
-        if flashOn then
-            _G.shell.setColour(0xFFFFFF, 0x0000FF) -- White text on blue bg
-            _G.invoke(gpu, "set", prevX, prevY, originalChar)
-        end
+        -- Always restore previous cell
+        _G.shell.setColour(0xFFFFFF, 0x0000FF) -- White on blue
+        _G.invoke(gpu, "set", prevX, prevY, originalChar)
 
-        -- Handle arrow key input
+        -- Handle arrow keys
         if code == 203 then
             keyboard.x = keyboard.x - 1
         elseif code == 205 then
@@ -29,22 +27,21 @@ keyboard.update = function(e, code)
             keyboard.y = keyboard.y + 1
         end
 
-        -- Clamp within screen bounds
+        -- Clamp to screen
         keyboard.x = math.max(1, math.min(keyboard.x, _G.wh[1]))
         keyboard.y = math.max(1, math.min(keyboard.y, _G.wh[2]))
 
-        -- Store current position and character
+        -- Update state
         prevX, prevY = keyboard.x, keyboard.y
         originalChar = _G.shell.readChar(keyboard.x, keyboard.y) or " "
 
-        -- Flashing cursor logic
+        -- Draw cursor with flashing effect
         local fg, bg
         if flashOn then
-            fg, bg = 0x000000, 0xFFFFFF -- Black text on white
+            fg, bg = 0x000000, 0xFFFFFF -- Black on white (flash)
         else
-            fg, bg = 0xFFFFFF, 0x0000FF -- White text on blue
+            fg, bg = 0xFFFFFF, 0x0000FF -- White on blue (normal)
         end
-
         _G.shell.setColour(fg, bg)
         _G.invoke(gpu, "set", keyboard.x, keyboard.y, originalChar)
 
