@@ -164,6 +164,16 @@ local success, _ = pcall(function()
 	vital()
 end)
 
+local function fMem(mem)
+	local units = {"B", "KiB", "MiB", "GiB"}
+	local unit = 1
+	while mem > 1024 and units[unit] do
+		unit = unit + 1
+		mem = mem/1024
+	end
+	return mem.." "..units[unit]
+end
+
 if success and _G.shell.fault == -1 then
 	computer.beep(1500, 0.1)
 	_G.shell.text("Basic System Checks OK.", true)
@@ -181,10 +191,11 @@ if success and _G.shell.fault == -1 then
 		_G.shell.text("Finished Loading Software", true)
 		_G.shell.sleep(1)
 		_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
-		_G.filesystem.directory = "./home" -- lists current directory
-		_G.shell.text("Current Directory: ".._G.filesystem.directory, true)
-		_G.filesystem.list(_G.filesystem.directory)
+		--_G.filesystem.directory = "./home" -- lists current directory
+		--_G.shell.text("Current Directory: ".._G.filesystem.directory, true)
+		--_G.filesystem.list(_G.filesystem.directory)
 		_G.filesystem.read(_G.filesystem.directory.."/hello_world.txt", true)
+		_G.shell.text(fMem(computer.freeMemory()) .. " OUT OF " .. fMem(computer.totalMemory()) .. " FREE", true)
 	end
 	-- later I want to use the highest tier graphics card
 	while true do
