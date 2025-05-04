@@ -64,14 +64,14 @@ end
 function _G.shell.setScreenBuffer()
 	for x = 1, _G.wh[1] do
 		for y = 1, _G.wh[2] do
-			table.insert(_G.screenbuffer, 0)
+			table.insert(_G.screenbuffer, " ")
 		end
 	end
 end
 function _G.shell.wipeScreenBuffer()
 	for x = 1, _G.wh[1] do
 		for y = 1, _G.wh[2] do
-			_G.screenbuffer[x+y] = 0
+			_G.screenbuffer[x+y] = " "
 		end
 	end
 end
@@ -174,7 +174,7 @@ if success and _G.shell.fault == -1 then
 	end
 	-- later I want to use the highest tier graphics card
 	while true do
-		local e, _, _, code = computer.pullSignal(0.05)
+		local e, _, _, code = computer.pullSignal(0.2)
 		if _G.shell.fault > -1 then
 			_G.shell.panic()
 			return
@@ -182,6 +182,7 @@ if success and _G.shell.fault == -1 then
 		pcall(function()
 			_G.package.keyboard.update(e, code)
 		end)
+		_G.shell.text("Ping", true)
 	end
 else
 	_G.shell.sleep(0.1)
