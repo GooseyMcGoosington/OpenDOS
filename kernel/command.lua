@@ -31,12 +31,12 @@ command.parse = function(str)
             _G.filesystem.list(parts[1])
         end
         if cmd == "CD" then
-            if _G.filesystem.exists(parts[1]) and _G.filesystem.isDirectory(parts[1]) then
+            if _G.filesystem.exists(parts[1]) then
                 _G.filesystem.directory = parts[1]
             end
         end
         if cmd == "READ" then
-            if _G.filesystem.exists(parts[1]) and (not _G.filesystem.isDirectory(parts[1])) then
+            if _G.filesystem.exists(parts[1]) then
                 _G.filesystem.read(parts[1], true)
             end
         end
