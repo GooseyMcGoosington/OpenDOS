@@ -11,7 +11,7 @@ utility.fMem = function(mem)
 end
 
 utility.report = function()
-    _G.shell.text(_G.package.utility.fMem(computer.freeMemory()) .. " OUT OF " .. _G.package.utility.fMem(computer.totalMemory()) .. " FREE", true)
+    _G.shell.text(utility.fMem(computer.freeMemory()) .. " OUT OF " .. utility.fMem(computer.totalMemory()) .. " FREE", true)
     _G.shell.text("GPUS: " .. tostring(#_G.gpu), true)
     _G.shell.text("SCREENS: " .. tostring(#_G.screen), true)
     _G.shell.text("TOTAL COMPONENTS: " .. tostring(#_G.components), true)
