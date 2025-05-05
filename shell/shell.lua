@@ -215,6 +215,8 @@ if success and _G.shell.fault == -1 then
 		_G.filesystem.read(_G.filesystem.directory.."/hello_world.txt", true)
 		_G.shell.text(_G.package.utility.fMem(computer.freeMemory()) .. " OUT OF " .. _G.package.utility.fMem(computer.totalMemory()) .. " FREE", true)
 		_G.shell.text("OK.", true)
+		_G.shell.run("/test.lua")
+		
 		_G.shell.currentLine = _G.shell.currentLine + 1
 	end
 	-- later I want to use the highest tier graphics card
