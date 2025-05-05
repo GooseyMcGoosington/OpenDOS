@@ -40,7 +40,10 @@ command.parse = function(str)
             end
         end
         if cmd == "RUN" then
-            _G.shell.text("UNAVAILABLE COMMAND", true)
+            --_G.shell.text("UNAVAILABLE COMMAND", true)
+            if _G.filesystem.exists(_G.filesystem.directory..parts[1]) then
+                _G.shell.run(_G.filesystem.directory..parts[1])
+            end
         end
         if cmd == "HELP" then
             for _, command in pairs(command.cmds) do
