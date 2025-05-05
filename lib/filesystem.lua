@@ -81,4 +81,17 @@ function fs.read(path, print)
         fs.print_file(path)
     end
 end
+
+function fs.loadfile(path)
+    if type(path) ~= "string" then
+        return nil, "invalid path"
+    end
+    local full = path:match("^/.*") and path or fs.directory .. "/" .. path
+    local data, err = fs.read(full)
+    if not data then
+        return nil, err
+    end
+    return load(data, "=" .. full, "t", _G)
+end
+
 return fs

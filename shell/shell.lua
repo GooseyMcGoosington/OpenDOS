@@ -150,7 +150,7 @@ function _G.shell.panic()
 	computer.shutdown(false)
 end
 function _G.shell.run(path, ...)
-    local chunk, err = _G.filesystem.loadfile(path)
+    local chunk, err = _G.filesystem.load(path)
     if not chunk then
         _G.shell.text("Error loading " .. tostring(path) .. ": " .. tostring(err), true)
         _G.shell.fault = 4
