@@ -152,10 +152,10 @@ end
 function _G.shell.run(path, ...)
     local chunk, err = _G.filesystem.read(path, false)
     if not chunk then
-        _G.shell.text("Error loading " .. ": " .. tostring(err), true)
+        _G.shell.text("FATAL: CANNOT LOAD " .. ": " .. tostring(err), true)
         return false
     end
-	local program = assert(loadstring(chunk))()
+	local program = assert(load(chunk))()
     return true, result
 end
 
