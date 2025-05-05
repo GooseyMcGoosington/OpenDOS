@@ -82,16 +82,4 @@ function fs.read(path, print)
     end
 end
 
-function fs.loadfile(path)
-    --[[if type(path) ~= "string" then
-        return nil, "invalid path"
-    end
-    local full = path:match("^/.*") and path or fs.directory .. "/" .. path
-    local data, err = fs.read(full)
-    if not data then
-        return nil, err
-    end]]
-    return load(fs.read(path, false))
-end
-
 return fs

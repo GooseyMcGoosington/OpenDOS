@@ -150,20 +150,12 @@ function _G.shell.panic()
 	computer.shutdown(false)
 end
 function _G.shell.run(path, ...)
-    -- Resolve absolute or relative paths automatically
-    local resolved = path:match("^/.*") and path or _G.filesystem.directory .. "/" .. path
-    local chunk, err = _G.filesystem.loadfile(resolved)
+    local chunk, err = fs.read(path, false)
     if not chunk then
-        _G.shell.text("Error loading " .. resolved .. ": " .. tostring(err), true)
+        _G.shell.text("Error loading " .. ": " .. tostring(err), true)
         return false
     end
-    -- Create coroutine for the chunk
-    local co = coroutine.create(chunk)
-    local ok, result = coroutine.resume(co, ...)
-    if not ok then
-        _G.shell.text("Program crashed: " .. tostring(result), true)
-        return false
-    end
+	local program = assert(loadstring(chunk))()
     return true, result
 end
 
@@ -216,7 +208,7 @@ if success and _G.shell.fault == -1 then
 		_G.shell.text(_G.package.utility.fMem(computer.freeMemory()) .. " OUT OF " .. _G.package.utility.fMem(computer.totalMemory()) .. " FREE", true)
 		_G.shell.text("OK.", true)
 		_G.shell.run("/test.lua")
-		
+
 		_G.shell.currentLine = _G.shell.currentLine + 1
 	end
 	-- later I want to use the highest tier graphics card
