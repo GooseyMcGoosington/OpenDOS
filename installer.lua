@@ -27,6 +27,7 @@ if io.read():lower() == "y" then
     local files = {
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/init.lua", path = basePath .. "/init.lua" },
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/home/hello_world.txt", path = basePath .. "/home/hello_world.txt" },
+        { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/home/test.lua", path = basePath .. "/home/test.lua" },
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/kernel/keyboard.lua", path = basePath .. "/kernel/keyboard.lua" },
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/kernel/command.lua", path = basePath .. "/kernel/command.lua" },
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/lib/filesystem.lua", path = basePath .. "/lib/filesystem.lua" },

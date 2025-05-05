@@ -67,19 +67,22 @@ function fs.read(path, print)
     if not print then
         local handle, reason = realfs.open(path)
         if not handle then
-            --_G.shell.text("Failed to open file: " .. tostring(reason), true)
+            _G.shell.text("Failed to open file: " .. tostring(reason), true)
+            return nil, reason
         else
             local contents = ""
-            repeat
+            while true do
                 local chunk = realfs.read(handle, math.huge)
-                contents = contents .. (chunk or "")
-            until not chunk
+                if not chunk then break end
+                contents = contents .. chunk
+            end
+            realfs.close(handle)
+            return contents
         end
-        realfs.close(handle)
-        return contents
     else
         fs.print_file(path)
     end
 end
+
 
 return fs

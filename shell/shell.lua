@@ -150,7 +150,7 @@ function _G.shell.panic()
 	computer.shutdown(false)
 end
 function _G.shell.run(path, ...)
-    local chunk, err = fs.read(path, false)
+    local chunk, err = _G.filesystem.read(path, false)
     if not chunk then
         _G.shell.text("Error loading " .. ": " .. tostring(err), true)
         return false
@@ -205,9 +205,8 @@ if success and _G.shell.fault == -1 then
 		_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
 		_G.filesystem.directory = "./home"
 		_G.filesystem.read(_G.filesystem.directory.."/hello_world.txt", true)
-		_G.shell.text(_G.package.utility.fMem(computer.freeMemory()) .. " OUT OF " .. _G.package.utility.fMem(computer.totalMemory()) .. " FREE", true)
+		_G.package.utility.report()
 		_G.shell.text("OK.", true)
-		_G.shell.run("/test.lua")
 
 		_G.shell.currentLine = _G.shell.currentLine + 1
 	end
