@@ -150,22 +150,23 @@ function _G.shell.panic()
 	computer.shutdown(false)
 end
 function _G.shell.run(path, ...)
-    local chunk, err = _G.filesystem.load(path)
+    -- Resolve absolute or relative paths automatically
+    local resolved = path:match("^/.*") and path or _G.filesystem.directory .. "/" .. path
+    local chunk, err = _G.filesystem.loadfile(resolved)
     if not chunk then
-        _G.shell.text("Error loading " .. tostring(path) .. ": " .. tostring(err), true)
-        _G.shell.fault = 4
+        _G.shell.text("Error loading " .. resolved .. ": " .. tostring(err), true)
         return false
     end
-    -- Wrap in coroutine for future yielding
+    -- Create coroutine for the chunk
     local co = coroutine.create(chunk)
     local ok, result = coroutine.resume(co, ...)
     if not ok then
         _G.shell.text("Program crashed: " .. tostring(result), true)
-        _G.shell.fault = 5
         return false
     end
     return true, result
 end
+
 function clr()
 	_G.shell.setColour(0x000000, 0x0000FF)
 end
