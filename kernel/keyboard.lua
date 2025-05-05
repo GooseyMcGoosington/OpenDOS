@@ -28,6 +28,19 @@ function keyboard.update(e, code, char, ascii)
         keyboard.x = 1
         return
     end
+    if e == "key_down" and code == 14 then
+        if keyboard.x > 1 then
+            keyboard.x = keyboard.x - 1
+            local idx = (keyboard.y - 1) * _G.wh[1] + keyboard.x
+            _G.screenbuffer[idx] = " "
+            _G.shell.setColour(0xFFFFFF, 0x0000FF)
+            _G.invoke(gpu, "set", keyboard.x, keyboard.y, " ")
+            lastX = keyboard.x
+            lastY = keyboard.y
+            _G.invoke(gpu, "set", keyboard.x, keyboard.y, "_")
+            return
+        end
+    end
     keyboard.x = math.max(1, math.min(keyboard.x, _G.wh[1]))
     keyboard.y = math.max(1, math.min(keyboard.y, _G.wh[2]))
     originalChar = _G.shell.readChar(keyboard.x, keyboard.y)
