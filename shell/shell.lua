@@ -15,6 +15,8 @@ _G.package = {
 	utility=nil
 }
 _G.screenbuffer={}
+_G.shell.dump = "UNKNOWN ERROR REPORTED"
+
 local faultCodes = {
 	[0] = "FATAL: Vital Fault",
 	[1] = "FATAL: System Fault",
@@ -145,6 +147,7 @@ function _G.shell.panic()
 	_G.shell.text(faultCodes[_G.shell.fault], false)
 	_G.shell.text("Panic triggered to prevent system damage.", false)
 	_G.shell.text("Crash Dump will be located in ./home", false)
+	_G.shell.text(_G.shell.dump, false)
 	_G.shell.text("This system will shutdown in 5 seconds.", false)
 	_G.shell.sleep(5)
 	computer.shutdown(false)
@@ -177,6 +180,7 @@ function panicLowMem()
 	local used = (computer.totalMemory() - computer.freeMemory()) / computer.totalMemory()
 	if used >= 0.93 then
 		_G.shell.fault = 2
+		_G.shell.dump = "MEMORY USAGED EXCEEDED 93%"
 		_G.shell.panic()
 		collectgarbage()
 	end
@@ -189,7 +193,7 @@ if success and _G.shell.fault == -1 then
 	computer.beep(1500, 0.1)
 	_G.shell.text("Basic System Checks OK.", true)
 	_G.shell.text("Please wait.", true)
-	local success, _ = pcall(function()
+	local success, msg = pcall(function()
 		_G.shell.text("Loading Lib", true)
 		_G.filesystem = dofile("/lib/filesystem.lua")
 		_G.package.utility = dofile("/lib/utility.lua")
@@ -199,6 +203,7 @@ if success and _G.shell.fault == -1 then
 	end)
 	if not success then
 		_G.shell.fault = 4
+		_G.shell.dump = msg
 	else
 		_G.shell.text("Finished Loading Software", true)
 		_G.shell.sleep(1)
@@ -229,6 +234,7 @@ if success and _G.shell.fault == -1 then
 		end)
 		if not success then
 			_G.shell.fault = 5
+			_G.shell.dump = msg
 			_G.shell.panic()
 		end
 		if _G.shell.currentLine >= _G.wh[2] then

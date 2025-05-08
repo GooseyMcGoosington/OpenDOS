@@ -30,14 +30,13 @@ function keyboard.update(e, code, char, ascii)
     end
     if e == "key_down" and code == 14 then
         if keyboard.x > 1 then
+            lastX = keyboard.x
+            lastY = keyboard.y
             keyboard.x = keyboard.x - 1
             local idx = (keyboard.y - 1) * _G.wh[1] + keyboard.x
             _G.screenbuffer[idx] = " "
             _G.shell.setColour(0xFFFFFF, 0x0000FF)
             _G.invoke(gpu, "set", keyboard.x, keyboard.y, " ")
-            lastX = keyboard.x
-            lastY = keyboard.y
-            _G.invoke(gpu, "set", keyboard.x, keyboard.y, "_")
             return
         end
     end
