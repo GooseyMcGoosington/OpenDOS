@@ -67,14 +67,14 @@ function compAdd(addr)
 	else
 		if ctype == "drive" then
 			-- Mount new drive
-			table.insert(_G.components, {address=addr})
 			local shortAddr  = addr:sub(1,8)      -- first 8 chars for readability
 			local mountPoint = "/mnt/" .. shortAddr
 			local ok, err    = fs.mount(mountPoint, addr)
 			if not ok then
 				_G.shell.text(err, true)
+			else
+				_G.shell.text("Mounted new drive at " .. mountPoint, true)
 			end
-			return
 		end
 		table.insert(_G.components, {address=addr})
 	end
