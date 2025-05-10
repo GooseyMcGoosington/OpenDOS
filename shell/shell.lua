@@ -227,7 +227,7 @@ if success and _G.shell.fault == -1 then
 			_G.shell.panic()
 			return
 		end
-		--[[local success, msg = pcall(function()
+		local success, msg = pcall(function()
 			local char = ascii ~= nil
 			if char then
 				char = string.char(ascii)
@@ -235,7 +235,7 @@ if success and _G.shell.fault == -1 then
 				char = ""
 			end
 			_G.package.keyboard.update(e, code, char, ascii)
-		end)]]
+		end)
 		local success, msg = pcall(function()
 			if e == "component_added" then
 				compAdd(addr)
