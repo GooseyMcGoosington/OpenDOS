@@ -1,4 +1,6 @@
 local fs = {}
+fs.mounts = {}
+
 fs.directory = "."
 local realfs = component.proxy(_G.bootAddress)
 

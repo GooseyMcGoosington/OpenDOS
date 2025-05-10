@@ -70,7 +70,7 @@ function compAdd(addr)
 			-- Mount new drive
 			local shortAddr  = addr:sub(1,8)      -- first 8 chars for readability
 			local mountPoint = "/mnt/" .. shortAddr
-			local ok, err    = fs.mount(mountPoint, addr)
+			local ok, err    = _G.filesystem.mount(mountPoint, addr)
 			if not ok then
 				_G.shell.text(err, true)
 			else
