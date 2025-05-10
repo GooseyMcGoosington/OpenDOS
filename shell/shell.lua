@@ -44,6 +44,22 @@ function findComp()
 		end
 	end
 end
+function compAdd(addr)
+	_G.shell.text("COMPONENT ADDED:" .. tostring(addr), true)
+	for address, comp in pairs(_G.components) do
+		if address == addr then
+			return
+		end
+	end
+	local ctype = component.proxy(addr)
+	if ctype == "gpu" then
+		table.insert(_G.gpu, {address=addr})
+	elseif ctype == "screen" then
+		table.insert(_G.screen, {address=addr})
+	else
+		table.insert(_G.components, {address=addr})
+	end
+end
 local loadfile = ...
 function dofile(file)
 	_G.shell.text("=> "..file, true)
@@ -190,9 +206,6 @@ local success, _ = pcall(function()
 	vital()
 end)
 
-function compAdd(addr)
-	_G.shell.text("COMPONENT ADDED:" .. tostring(addr), true)
-end
 if success and _G.shell.fault == -1 then
 	computer.beep(1500, 0.1)
 	_G.shell.text("Basic System Checks OK.", true)
@@ -239,6 +252,9 @@ if success and _G.shell.fault == -1 then
 		local success, msg = pcall(function()
 			if e == "component_added" then
 				compAdd(addr)
+			end
+			if e == "component_removed" then
+				--compRemove(addr)
 			end
 		end)
 		if not success then
