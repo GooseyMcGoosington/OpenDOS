@@ -223,7 +223,7 @@ if success and _G.shell.fault == -1 then
 			_G.shell.panic()
 			return
 		end
-		local success, msg = pcall(function()
+		--[[local success, msg = pcall(function()
 			local char = ascii ~= nil
 			if char then
 				char = string.char(ascii)
@@ -231,12 +231,12 @@ if success and _G.shell.fault == -1 then
 				char = ""
 			end
 			_G.package.keyboard.update(e, code, char, ascii)
-		end)
-		if not success then
+		end)]]
+		--[[if not success then
 			_G.shell.fault = 5
 			_G.shell.dump = msg
 			_G.shell.panic()
-		end
+		end]]
 		if _G.shell.currentLine >= _G.wh[2] then
 			_G.shell.setColour(0xFFFFFF, 0x0000FF)
             _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
