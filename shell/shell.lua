@@ -71,6 +71,9 @@ function compAdd(addr)
 			local shortAddr  = addr:sub(1,8)      -- first 8 chars for readability
 			local mountPoint = "/mnt/" .. shortAddr
 			local ok, err    = fs.mount(mountPoint, addr)
+			if not ok then
+				_G.shell.text(err, true)
+			end
 			return
 		end
 		table.insert(_G.components, {address=addr})
