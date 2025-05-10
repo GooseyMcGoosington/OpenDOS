@@ -16,7 +16,6 @@ _G.package = {
 }
 _G.screenbuffer={}
 _G.shell.dump = "UNKNOWN ERROR REPORTED"
-
 local faultCodes = {
 	[0] = "FATAL: Vital Fault",
 	[1] = "FATAL: System Fault",
@@ -45,7 +44,6 @@ function findComp()
 	end
 end
 function compAdd(addr)
-	_G.shell.text("COMPONENT ADDED:" .. tostring(addr), true)
 	for _, comp in pairs(_G.components) do
 		if comp.address == addr then
 			return
@@ -67,6 +65,11 @@ function compAdd(addr)
 	elseif ctype == "screen" then
 		table.insert(_G.screen, {address=addr})
 	else
+		if ctype == "drive" then
+			-- Mount new drive
+			table.insert(_G.components, {address=addr})
+			return
+		end
 		table.insert(_G.components, {address=addr})
 	end
 end
@@ -207,7 +210,6 @@ function _G.shell.run(path, ...)
 	local program = assert(load(chunk))()
     return true, result
 end
-
 function clr()
 	_G.shell.setColour(0x000000, 0x0000FF)
 end
@@ -235,7 +237,6 @@ local success, _ = pcall(function()
 	findComp()
 	vital()
 end)
-
 if success and _G.shell.fault == -1 then
 	computer.beep(1500, 0.1)
 	_G.shell.text("Basic System Checks OK.", true)
@@ -259,7 +260,6 @@ if success and _G.shell.fault == -1 then
 		_G.filesystem.read(_G.filesystem.directory.."/hello_world.txt", true)
 		_G.package.utility.report()
 		_G.shell.text("OK.", true)
-
 		_G.shell.currentLine = _G.shell.currentLine + 1
 	end
 	-- later I want to use the highest tier graphics card
