@@ -46,18 +46,48 @@ function findComp()
 end
 function compAdd(addr)
 	_G.shell.text("COMPONENT ADDED:" .. tostring(addr), true)
-	for address, comp in pairs(_G.components) do
-		if address == addr then
+	for _, comp in pairs(_G.components) do
+		if comp.address == addr then
 			return
 		end
 	end
-	local ctype = component.proxy(addr)
+	for _, comp in pairs(_G.screen) do
+		if comp.address == addr then
+			return
+		end
+	end
+	for _, comp in pairs(_G.gpu) do
+		if comp.address == addr then
+			return
+		end
+	end
+	local ctype = component.type(addr)
 	if ctype == "gpu" then
 		table.insert(_G.gpu, {address=addr})
 	elseif ctype == "screen" then
 		table.insert(_G.screen, {address=addr})
 	else
 		table.insert(_G.components, {address=addr})
+	end
+end
+function compRemove(addr)
+	for i, comp in pairs(_G.components) do
+		if comp.address == addr then
+			table.remove(_G.components, i)
+			return
+		end
+	end
+	for i, comp in pairs(_G.gpu) do
+		if comp.address == addr then
+			table.remove(_G.gpu, i)
+			return
+		end
+	end
+	for i, comp in pairs(_G.screen) do
+		if comp.address == addr then
+			table.remove(_G.screen, i)
+			return
+		end
 	end
 end
 local loadfile = ...
@@ -254,7 +284,7 @@ if success and _G.shell.fault == -1 then
 				compAdd(addr)
 			end
 			if e == "component_removed" then
-				--compRemove(addr)
+				compRemove(addr)
 			end
 		end)
 		if not success then
