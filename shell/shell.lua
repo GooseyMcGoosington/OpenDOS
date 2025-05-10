@@ -65,7 +65,8 @@ function compAdd(addr)
 	elseif ctype == "screen" then
 		table.insert(_G.screen, {address=addr})
 	else
-		if ctype == "drive" then
+		_G.shell.text(ctype, true)
+		if ctype == "filesystem" then
 			-- Mount new drive
 			local shortAddr  = addr:sub(1,8)      -- first 8 chars for readability
 			local mountPoint = "/mnt/" .. shortAddr
