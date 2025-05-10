@@ -2,6 +2,22 @@ local fs = {}
 fs.directory = "."
 local realfs = component.proxy(_G.bootAddress)
 
+function fs.makeDirectory(path)
+    realfs.makeDirectory(path)
+end
+function fs.mount(mountPoint, address)
+  local ok, proxy = pcall(component.proxy, address)
+  if not ok or not proxy then
+    _G.shell.text("Failed to mount new storage device", true)
+    return false, proxy
+  end
+  -- Create mount directory if needed
+  realfs.makeDirectory(mountPoint)
+  fs.mounts[mountPoint] = proxy
+  return true
+end
+fs.makeDirectory("/mnt")
+
 function fs.list(path)
     local entries = {}
 
