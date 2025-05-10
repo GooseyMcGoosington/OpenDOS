@@ -189,6 +189,10 @@ local success, _ = pcall(function()
 	findComp()
 	vital()
 end)
+
+function compAdd(addr)
+	_G.shell.text("COMPONENT ADDED:" .. tostring(addr), true)
+end
 if success and _G.shell.fault == -1 then
 	computer.beep(1500, 0.1)
 	_G.shell.text("Basic System Checks OK.", true)
@@ -217,7 +221,7 @@ if success and _G.shell.fault == -1 then
 	end
 	-- later I want to use the highest tier graphics card
 	while true do
-		local e, _, ascii, code = computer.pullSignal(0.05)
+		local e, addr, ascii, code = computer.pullSignal(0.05)
 		panicLowMem()
 		if _G.shell.fault > -1 then
 			_G.shell.panic()
@@ -232,11 +236,16 @@ if success and _G.shell.fault == -1 then
 			end
 			_G.package.keyboard.update(e, code, char, ascii)
 		end)]]
-		--[[if not success then
+		local success, msg = pcall(function()
+			if e == "component_added" then
+				compAdd(addr)
+			end
+		end)
+		if not success then
 			_G.shell.fault = 5
 			_G.shell.dump = msg
 			_G.shell.panic()
-		end]]
+		end
 		if _G.shell.currentLine >= _G.wh[2] then
 			_G.shell.setColour(0xFFFFFF, 0x0000FF)
             _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
