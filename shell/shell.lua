@@ -21,8 +21,9 @@ local faultCodes = {
 	[1] = "FATAL: System Fault",
 	[2] = "FATAL: Out of Memory",
 	[3] = "FATAL: Hardware Fault",
-	[4] = "SYSTEM: Software Load Failure",
-	[5] = "KERNEL: Software Exception"
+	[4] = "KERNEL: Software Load Failure",
+	[5] = "KERNEL: Software Exception",
+	[6] = "FATAL: Disk Failure"
 }
 local shutdown = computer.shutdown
 computer.shutdown = function(reboot)
@@ -76,6 +77,7 @@ function compAdd(addr)
 			else
 				_G.shell.text("Mounted new drive at " .. mountPoint, true)
 			end
+			_G.shell.currentLine = _G.shell.currentLine + 1
 		end
 		table.insert(_G.components, {address=addr, ctype=ctype})
 	end
@@ -91,6 +93,11 @@ function compRemove(addr)
 					_G.shell.text(err, true)
 				else
 					_G.shell.text("Unmounted drive at " .. mountPoint, true)
+				end
+				_G.shell.currentLine = _G.shell.currentLine + 1
+				if (_G.bootAddress == addr) then
+					_G.shell.fault = 6
+					return
 				end
 			end
 			table.remove(_G.components, i)
@@ -110,7 +117,8 @@ function compRemove(addr)
 		end
 	end
 end
-local loadfile = ...
+local loadfile = ... -- This pulls in the contents of the program that called the code we are in now.
+
 function dofile(file)
 	_G.shell.text("=> "..file, true)
 	local program, reason = loadfile(file)
@@ -222,6 +230,7 @@ function _G.shell.run(path, ...)
     local chunk, err = _G.filesystem.read(path, false)
     if not chunk then
         _G.shell.text("FATAL: CANNOT LOAD " .. ": " .. tostring(err), true)
+		_G.shell.currentLine = _G.shell.currentLine + 1
         return false
     end
 	local program = assert(load(chunk))()
