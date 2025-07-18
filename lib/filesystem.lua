@@ -18,6 +18,27 @@ function fs.mount(mountPoint, address)
   fs.mounts[mountPoint] = proxy
   return true
 end
+
+function fs.mount(mountPoint, address)
+  local ok, proxy = pcall(component.proxy, address)
+  if not ok or not proxy then
+    _G.shell.text("Failed to mount new storage device", true)
+    return false, proxy
+  end
+  realfs.makeDirectory(mountPoint)
+  fs.mounts[mountPoint] = proxy
+  return true
+end
+function fs.unmount(mountPoint)
+  local proxy = fs.mounts[mountPoint]
+  if not proxy then
+    return false, ("No filesystem mounted at %s"):format(mountPoint)
+  end
+  fs.mounts[mountPoint] = nil
+  local ok, err = pcall(realfs.remove, mountPoint)
+  return true
+end
+
 fs.makeDirectory("/mnt")
 
 function fs.list(path)

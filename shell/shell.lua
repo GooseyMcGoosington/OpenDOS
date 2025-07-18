@@ -61,9 +61,9 @@ function compAdd(addr)
 	end
 	local ctype = component.type(addr)
 	if ctype == "gpu" then
-		table.insert(_G.gpu, {address=addr})
+		table.insert(_G.gpu, {address=addr, ctype=ctype})
 	elseif ctype == "screen" then
-		table.insert(_G.screen, {address=addr})
+		table.insert(_G.screen, {address=addr, ctype=ctype})
 	else
 		_G.shell.text(ctype, true)
 		if ctype == "filesystem" then
@@ -77,12 +77,22 @@ function compAdd(addr)
 				_G.shell.text("Mounted new drive at " .. mountPoint, true)
 			end
 		end
-		table.insert(_G.components, {address=addr})
+		table.insert(_G.components, {address=addr, ctype=ctype})
 	end
 end
 function compRemove(addr)
 	for i, comp in pairs(_G.components) do
 		if comp.address == addr then
+			if comp.ctype == "filesystem" then
+				local shortAddr  = addr:sub(1,8)      -- first 8 chars for readability
+				local mountPoint = "/mnt/" .. shortAddr
+				local ok, err    = _G.filesystem.unmount(mountPoint)
+				if not ok then
+					_G.shell.text(err, true)
+				else
+					_G.shell.text("Unmounted drive at " .. mountPoint, true)
+				end
+			end
 			table.remove(_G.components, i)
 			return
 		end
@@ -201,8 +211,8 @@ function _G.shell.panic()
 	_G.shell.setColour(0xFFFFFF, 0xFF0000)
 	_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
 	_G.shell.text(faultCodes[_G.shell.fault], false)
-	_G.shell.text("Panic triggered to prevent system damage.", false)
-	_G.shell.text("Crash Dump will be located in ./home", false)
+	_G.shell.text("Panic triggered.", false)
+	_G.shell.text("A crash dump is unavailable.", false)
 	_G.shell.text(_G.shell.dump, false)
 	_G.shell.text("This system will shutdown in 5 seconds.", false)
 	_G.shell.sleep(5)
