@@ -31,11 +31,10 @@ end
 
 fs.makeDirectory("/mnt")
 
--- 🔧 NEW: Resolves a path to the correct proxy and subpath
 local function resolve(path)
     for mountPoint, proxy in pairs(fs.mounts) do
         if path:sub(1, #mountPoint) == mountPoint then
-            local subPath = path:sub(#mountPoint + 2) -- skip slash
+            local subPath = path:sub(#mountPoint + 2)
             if subPath == "" then subPath = "." end
             return proxy, subPath
         end
@@ -44,31 +43,32 @@ local function resolve(path)
 end
 
 function fs.list(path)
-    local entries = {}
+  local entries = {}
 
-    if type(path) ~= "string" then
-        _G.shell.text("INVALID PATH" .. type(path), true)
-        computer.beep(500, 0.1)
-        return nil, "invalid path"
-    end
+  if type(path) ~= "string" then
+    _G.shell.text("INVALID PATH" .. type(path), true)
+    computer.beep(500, 0.1)
+    return nil, "invalid path"
+  end
 
-    local proxy, subPath = resolve(path)
-    local ok, result = pcall(proxy.list, subPath)
-    if not ok or not result then
-        _G.shell.text("ERROR LISTING => " .. path .. " / " .. tostring(result), true)
-        computer.beep(500, 0.1)
-        return nil, result
-    end
+  local proxy, subPath = resolve(path)
+  local ok, result = pcall(proxy.list, subPath)
+  if not ok or not result then
+    _G.shell.text("ERROR LISTING => " .. path .. " / " .. tostring(result), true)
+    computer.beep(500, 0.1)
+    return nil, result
+  end
 
-    for _, name in ipairs(result) do
-        table.insert(entries, name)
-        _G.shell.text("=> " .. path .. "/" .. name, true)
-    end
-    if _G.package.keyboard ~= nil then
-        _G.shell.currentLine = _G.shell.currentLine + 1
-        _G.package.keyboard.getLineAsString()
-    end
-    return entries
+  for _, name in ipairs(result) do
+    table.insert(entries, name)
+    _G.shell.text("=> " .. path .. "/" .. name, true)
+  end
+
+  if _G.package.keyboard ~= nil then
+    _G.shell.currentLine = _G.shell.currentLine + 1
+    _G.package.keyboard.getLineAsString()
+  end
+  return entries
 end
 
 function fs.exists(path)
