@@ -4,8 +4,34 @@ fs.mounts = {}
 fs.directory = "."
 local realfs = component.proxy(_G.bootAddress)
 
+-- Utility to split path into components by '/'
+local function splitPath(path)
+  local parts = {}
+  for part in path:gmatch("[^/]+") do
+    table.insert(parts, part)
+  end
+  return parts
+end
+
+-- Helper to check if path is under a mounted path, return mount proxy and relative path if so
+local function getMountProxyAndRelPath(path)
+    local parts = splitPath(path)
+    if parts[1] == "." and parts[2] == "mnt" and parts[3] and fs.mounts[parts[3]] then
+        local mountProxy = fs.mounts[parts[3]]
+        local relPath = table.concat({select(4, table.unpack(parts))}, "/")
+        if relPath == "" then relPath = "/" end
+        return mountProxy, relPath
+    end
+    return nil, nil
+end
+
 function fs.makeDirectory(path)
-    realfs.makeDirectory(path)
+    local mountProxy, relPath = getMountProxyAndRelPath(path)
+    if mountProxy then
+        return mountProxy.makeDirectory(relPath)
+    else
+        return realfs.makeDirectory(path)
+    end
 end
 
 function fs.mount(mountPoint, address)
@@ -32,23 +58,33 @@ end
 fs.makeDirectory("/mnt")
 
 function fs.list(path)
+    local mountProxy, relPath = getMountProxyAndRelPath(path)
     local entries = {}
 
-    if type(path) ~= "string" then
-        _G.shell.text("INVALID PATH" .. type(path), true)
-        computer.beep(500, 0.1)
-        return nil, "invalid path"
+    if mountProxy then
+        local ok, result = pcall(mountProxy.list, relPath)
+        if not ok or not result then
+            _G.shell.text("ERROR LISTING => " .. path .. "/ " .. tostring(result), true)
+            computer.beep(500, 0.1)
+            return nil, result
+        end
+        for _, name in ipairs(result) do
+            table.insert(entries, name)
+            _G.shell.text("=> " .. path .. "/" .. name, true)
+        end
+    else
+        local ok, result = pcall(realfs.list, path)
+        if not ok or not result then
+            _G.shell.text("ERROR LISTING => " .. path .. "/ " .. tostring(result), true)
+            computer.beep(500, 0.1)
+            return nil, result
+        end
+        for _, name in ipairs(result) do
+            table.insert(entries, name)
+            _G.shell.text("=> " .. path .. "/" .. name, true)
+        end
     end
-    local ok, result = pcall(realfs.list, path)
-    if not ok or not result then
-        _G.shell.text("ERROR LISTING => " .. path .. "/ " .. tostring(result), true)
-        computer.beep(500, 0.1)
-        return nil, result
-    end
-    for _, name in ipairs(result) do
-        table.insert(entries, name)
-        _G.shell.text("=> " .. path .. "/" .. name, true)
-    end
+
     if _G.package.keyboard ~= nil then
         _G.shell.currentLine = _G.shell.currentLine + 1
         _G.package.keyboard.getLineAsString()
@@ -57,83 +93,75 @@ function fs.list(path)
 end
 
 function fs.exists(path)
-    return realfs.exists(path)
+    local mountProxy, relPath = getMountProxyAndRelPath(path)
+    if mountProxy then
+        return mountProxy.exists(relPath)
+    else
+        return realfs.exists(path)
+    end
 end
 
 function fs.isDirectory(path)
-    return realfs.isDirectory(path)
+    local mountProxy, relPath = getMountProxyAndRelPath(path)
+    if mountProxy then
+        return mountProxy.isDirectory(relPath)
+    else
+        return realfs.isDirectory(path)
+    end
 end
 
 function fs.size(path)
-    return realfs.size(path)
-end
-
-local function splitPath(path)
-  local parts = {}
-  for part in path:gmatch("[^/]+") do
-    table.insert(parts, part)
-  end
-  return parts
+    local mountProxy, relPath = getMountProxyAndRelPath(path)
+    if mountProxy then
+        return mountProxy.size(relPath)
+    else
+        return realfs.size(path)
+    end
 end
 
 function fs.print_file(filePath)
-    local parts = splitPath(filePath)
-    -- Check if path is under ./mnt/<mountPoint>/...
-    if parts[1] == "." and parts[2] == "mnt" and parts[3] and fs.mounts[parts[3]] then
-        local mountProxy = fs.mounts[parts[3]]
-        -- Build relative path inside mounted fs
-        local relPath = table.concat({select(4, table.unpack(parts))}, "/")
-        if relPath == "" then relPath = "/" end
-        local handle, reason = mountProxy.open(relPath)
-        if not handle then
-            --_G.shell.text("Error opening file on mount: " .. tostring(reason), true)
-            return
-        end
-        local buffer = ""
-        repeat
-            local chunk = mountProxy.read(handle, math.huge)
-            if chunk then buffer = buffer .. chunk end
-        until not chunk
-        mountProxy.close(handle)
-
-        for line in buffer:gmatch("[^\r\n]+") do
-            _G.shell.text(line, true)
-        end
-        if _G.package.keyboard ~= nil then
-            _G.shell.currentLine = _G.shell.currentLine + 1
-            _G.package.keyboard.getLineAsString()
-        end
+    local mountProxy, relPath = getMountProxyAndRelPath(filePath)
+    local handle, reason
+    if mountProxy then
+        handle, reason = mountProxy.open(relPath)
     else
-        -- Not mounted, use realfs
-        local handle, reason = realfs.open(filePath)
-        if not handle then
-            --_G.shell.text("Error opening file: " .. tostring(reason), true)
-            return
-        end
-        local buffer = ""
-        repeat
-            local chunk = realfs.read(handle, math.huge)
-            if chunk then buffer = buffer .. chunk end
-        until not chunk
-        realfs.close(handle)
+        handle, reason = realfs.open(filePath)
+    end
+    if not handle then
+        --_G.shell.text("Error opening file: " .. tostring(reason), true)
+        return
+    end
 
-        for line in buffer:gmatch("[^\r\n]+") do
-            _G.shell.text(line, true)
+    local buffer = ""
+    repeat
+        local chunk
+        if mountProxy then
+            chunk = mountProxy.read(handle, math.huge)
+        else
+            chunk = realfs.read(handle, math.huge)
         end
-        if _G.package.keyboard ~= nil then
-            _G.shell.currentLine = _G.shell.currentLine + 1
-            _G.package.keyboard.getLineAsString()
-        end
+        if chunk then buffer = buffer .. chunk end
+    until not chunk
+
+    if mountProxy then
+        mountProxy.close(handle)
+    else
+        realfs.close(handle)
+    end
+
+    for line in buffer:gmatch("[^\r\n]+") do
+        _G.shell.text(line, true)
+    end
+    if _G.package.keyboard ~= nil then
+        _G.shell.currentLine = _G.shell.currentLine + 1
+        _G.package.keyboard.getLineAsString()
     end
 end
 
 function fs.read(path, print)
-    local parts = splitPath(path)
-    if parts[1] == "." and parts[2] == "mnt" and parts[3] and fs.mounts[parts[3]] then
-        local mountProxy = fs.mounts[parts[3]]
-        local relPath = table.concat({select(4, table.unpack(parts))}, "/")
-        if relPath == "" then relPath = "/" end
+    local mountProxy, relPath = getMountProxyAndRelPath(path)
 
+    if mountProxy then
         if not print then
             local handle, reason = mountProxy.open(relPath)
             if not handle then
@@ -150,11 +178,9 @@ function fs.read(path, print)
                 return contents
             end
         else
-            -- Print via fs.print_file for this path
             fs.print_file(path)
         end
     else
-        -- Use realfs as fallback
         if not print then
             local handle, reason = realfs.open(path)
             if not handle then
@@ -175,6 +201,5 @@ function fs.read(path, print)
         end
     end
 end
-
 
 return fs
