@@ -6,6 +6,9 @@ local realfs = component.proxy(_G.bootAddress)
 
 -- Normalize paths strictly without adding trailing slashes
 local function normalize(path)
+    _G.shell.text(path, true)
+    _G.shell.currentLine = _G.shell.currentLine + 1
+
     if path:sub(1, 2) == "./" then
         path = fs.directory .. path:sub(2)
     elseif path:sub(1, 1) ~= "/" then
@@ -16,6 +19,8 @@ local function normalize(path)
     if path:sub(-1) == "/" then         -- remove trailing slash if present
         path = path:sub(1, -2)
     end
+    _G.shell.text(path, true)
+    _G.shell.currentLine = _G.shell.currentLine + 1
     return path
 end
 
