@@ -1,22 +1,25 @@
 local fs = {}
 fs.mounts = {}
+fs.directory = "."  -- Default working directory
 
-fs.directory = "." -- working directory
 local realfs = component.proxy(_G.bootAddress)
 
--- Path normalization and resolution
+-- Normalize paths strictly without adding trailing slashes
 local function normalize(path)
     if path:sub(1, 2) == "./" then
         path = fs.directory .. path:sub(2)
     elseif path:sub(1, 1) ~= "/" then
         path = fs.directory .. "/" .. path
     end
-    path = path:gsub("/+", "/")       -- collapse multiple slashes
-    path = path:gsub("/%./", "/")     -- remove /./
-    path = path:gsub("/$", "")        -- remove trailing slash
+    path = path:gsub("/+", "/")         -- collapse repeated slashes
+    path = path:gsub("/%./", "/")       -- remove /./
+    if path:sub(-1) == "/" then         -- remove trailing slash if present
+        path = path:sub(1, -2)
+    end
     return path
 end
 
+-- Resolve path to correct filesystem proxy and path on that fs
 local function resolve(path)
     path = normalize(path)
     for mountPoint, proxy in pairs(fs.mounts) do
@@ -49,11 +52,11 @@ function fs.unmount(mountPoint)
         return false, ("No filesystem mounted at %s"):format(mountPoint)
     end
     fs.mounts[mountPoint] = nil
-    local ok, err = pcall(realfs.remove, mountPoint)
+    pcall(realfs.remove, mountPoint)
     return true
 end
 
--- Auto-create /mnt on boot
+-- Make sure /mnt exists (only once at init)
 fs.makeDirectory = function(path)
     local proxy, realPath = resolve(path)
     return proxy.makeDirectory(realPath)
@@ -73,7 +76,7 @@ function fs.list(path)
 
     local ok, result = pcall(proxy.list, realPath)
     if not ok or not result then
-        _G.shell.text("ERROR LISTING => " .. path .. "/ " .. tostring(result), true)
+        _G.shell.text("ERROR LISTING => " .. path .. " " .. tostring(result), true)
         computer.beep(500, 0.1)
         return nil, result
     end
@@ -83,7 +86,7 @@ function fs.list(path)
         _G.shell.text("=> " .. path .. "/" .. name, true)
     end
 
-    if _G.package.keyboard ~= nil then
+    if _G.package.keyboard then
         _G.shell.currentLine = _G.shell.currentLine + 1
         _G.package.keyboard.getLineAsString()
     end
@@ -96,7 +99,7 @@ function fs.exists(path)
     return proxy.exists(realPath)
 end
 
--- Is directory?
+-- Is directory
 function fs.isDirectory(path)
     local proxy, realPath = resolve(path)
     return proxy.isDirectory(realPath)
@@ -108,7 +111,7 @@ function fs.size(path)
     return proxy.size(realPath)
 end
 
--- File read
+-- Read a file's contents or print it line-by-line
 function fs.read(path, printOutput)
     local proxy, realPath = resolve(path)
 
@@ -117,44 +120,41 @@ function fs.read(path, printOutput)
         if not handle then
             _G.shell.text("Failed to open file: " .. tostring(reason), true)
             return nil, reason
-        else
-            local contents = ""
-            while true do
-                local chunk = proxy.read(handle, math.huge)
-                if not chunk then break end
-                contents = contents .. chunk
-            end
-            proxy.close(handle)
-            return contents
         end
+        local contents = ""
+        while true do
+            local chunk = proxy.read(handle, math.huge)
+            if not chunk then break end
+            contents = contents .. chunk
+        end
+        proxy.close(handle)
+        return contents
     else
         local handle, reason = proxy.open(realPath)
         if not handle then return end
         local buffer = ""
         repeat
             local chunk = proxy.read(handle, math.huge)
-            if chunk then
-                buffer = buffer .. chunk
-            end
+            if chunk then buffer = buffer .. chunk end
         until not chunk
         proxy.close(handle)
 
         for line in buffer:gmatch("[^\r\n]+") do
             _G.shell.text(line, true)
         end
-        if _G.package.keyboard ~= nil then
+        if _G.package.keyboard then
             _G.shell.currentLine = _G.shell.currentLine + 1
             _G.package.keyboard.getLineAsString()
         end
     end
 end
 
--- Print file shortcut
+-- Shortcut to print a file
 function fs.print_file(path)
     fs.read(path, true)
 end
 
--- Optional: Write file
+-- Optional write function
 function fs.write(path, data)
     local proxy, realPath = resolve(path)
     local handle, err = proxy.open(realPath, "w")
