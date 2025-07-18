@@ -16,9 +16,7 @@ local function normalize(path)
     end
     path = path:gsub("/+", "/")         -- collapse repeated slashes
     path = path:gsub("/%./", "/")       -- remove /./
-    if path:sub(-1) == "/" then         -- remove trailing slash if present
-        path = path:sub(1, -2)
-    end
+    path = path:gsub("([^/])/*$", "%1")
     _G.shell.text(path, true)
     _G.shell.currentLine = _G.shell.currentLine + 1
     return path
