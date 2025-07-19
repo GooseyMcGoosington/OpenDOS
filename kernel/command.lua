@@ -32,19 +32,17 @@ command.parse = function(str)
             end
             if cmd == "CD" then
                 local dir = parts[1]
-                if (str:match("^%s*$")) then
-                    if (string.sub(parts[1], 1, 2) == "..") then
-                        _G.filesystem.directory = _G.filesystem.parentPath(_G.filesystem.directory)
-                    elseif (string.sub(parts[1], 1, 2) == "./") then
-                        if _G.filesystem.exists(parts[1]) then
-                            _G.filesystem.directory = parts[1]
-                        end
-                    else
-                        dir = _G.filesystem.directory .. parts[1] .. "/"
-                        if _G.filesystem.exists(dir) then
-                            _G.filesystem.directory = dir
-                        end
-                    end 
+                if (string.sub(parts[1], 1, 2) == "./") then
+                    if _G.filesystem.exists(parts[1]) then
+                        _G.filesystem.directory = parts[1]
+                    end
+                elseif (string.sub(parts[1], 1, 2) == "..") then
+                    _G.filesystem.directory = _G.filesystem.parentPath(_G.filesystem.directory)
+                else
+                    dir = _G.filesystem.directory .. parts[1] .. "/"
+                    if _G.filesystem.exists(dir) then
+                        _G.filesystem.directory = dir
+                    end
                 end
             end
             if cmd == "READ" then
