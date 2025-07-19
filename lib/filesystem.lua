@@ -21,6 +21,15 @@ function parseMountPath(path)
     end
 end
 
+function fs.parentPath(path)
+    path = path:gsub("/+$", "")
+    if path == "." then
+        return nil
+    end
+    local lastSlash = path:match("^(.*)/[^/]+$")
+    return lastSlash or "."
+end
+
 function fs.mount(mountPoint, address)
     realfs.makeDirectory(mountPoint)
     fs.mounts[mountPoint] = component.proxy(address)
@@ -46,29 +55,24 @@ function fs.list(path)
     local isMounted, drive, subpath = parseMountPath(path)
     for mountPoint, proxy in pairs(fs.mounts) do
         local address = proxy.address or "<unknown>"
-        _G.shell.text("Mount Point: " .. mountPoint .. " -> Address: " .. address, true)
     end
     if isMounted then
         currentFS = fs.mounts["./mnt/"..drive:sub(1, 8)]
         if currentFS then
             path = subpath
-            _G.shell.text("Found mounted filesystem; " .. drive .. " " .. path, true)
         end
     end
-
     if type(path) ~= "string" then
         _G.shell.text("INVALID PATH" .. type(path), true)
         computer.beep(500, 0.1)
         return nil, "invalid path"
     end
-
     local ok, result = pcall(currentFS.list, path)
     if not ok or not result then
         _G.shell.text("ERROR LISTING => " .. path .. " " .. tostring(result), true)
         computer.beep(500, 0.1)
         return nil, result
     end
-
     for _, name in ipairs(result) do
         table.insert(entries, name)
         _G.shell.text("=> " .. path .. "/" .. name, true)
