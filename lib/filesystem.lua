@@ -57,6 +57,7 @@ function fs.list(path)
     local entries = {}
 
     local current_fs, newPath = setFSPath(path)
+    current_fs = fs.mounts[current_fs]
     path = newPath
     
     if type(path) ~= "string" then
