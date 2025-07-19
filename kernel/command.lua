@@ -42,7 +42,7 @@ command.parse = function(str)
 
                 if (string.sub(dir, 1, 2) == "./") then
                     if _G.filesystem.exists(dir) then
-                        _G.filesystem.directory = dir
+                        _G.filesystem.directory = dir:gsub("/*$", "/")
                     end
                 else
                     dir = _G.filesystem.directory .. dir .. "/"

@@ -66,7 +66,7 @@ function fs.list(path)
     end
     for _, name in ipairs(result) do
         table.insert(entries, name)
-        _G.shell.text("=> " .. path .. "/" .. name, true)
+        _G.shell.text("=> " .. path .. name, true)
     end
     if _G.package.keyboard ~= nil then
         _G.shell.currentLine = _G.shell.currentLine + 1
