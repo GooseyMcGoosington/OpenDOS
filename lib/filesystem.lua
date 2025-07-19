@@ -9,30 +9,22 @@ function fs.makeDirectory(path)
 end
 
 function parseMountPath(path)
-    -- Normalize to remove redundant `./` at start
     path = path:gsub("^%./", "")
 
-    -- Match against mnt pattern
-    local drive, subpath = path:match("^mnt/([%w%-]+)/(.+)$")
+    local drive, subpath = path:match("^mnt/([%w%-]+)/(.*)$")
     if drive then
-        return true, drive, "." .. subpath
+        return true, drive, "./" .. subpath
     elseif path:match("^mnt/[%w%-]+$") then
         drive = path:match("^mnt/([%w%-]+)$")
-        return true, drive, "."
+        return true, drive, "./"
     else
         return false, "<unknown>", "<unknown>"
     end
 end
 
 function fs.mount(mountPoint, address)
-  local ok, proxy = pcall(component.proxy, address)
-  if not ok or not proxy then
-    _G.shell.text("Failed to mount new storage device", true)
-    return false, proxy
-  end
-  -- Create mount directory if needed
   realfs.makeDirectory(mountPoint)
-  fs.mounts[mountPoint] = proxy
+  fs.mounts[mountPoint] = component.proxy(address)
   return true
 end
 
@@ -58,7 +50,11 @@ function fs.list(path)
         _G.shell.text("Mount Point: " .. mountPoint .. " -> Address: " .. address, true)
     end
     if isMounted then
-        currentFS = fs.mounts["./mnt/"..drive]
+        currentFS = fs.mounts["./mnt/"..drive:sub(1, 8)]
+        if (fs.mounts["./mnt/"..drive:sub(1, 8)]) then
+            path = subpath
+            _G.shell.text("Found mounted filesystem; " .. drive .. " " .. path, true)
+        end
     end
     if type(path) ~= "string" then
         _G.shell.text("INVALID PATH" .. type(path), true)
@@ -67,7 +63,7 @@ function fs.list(path)
     end
     local ok, result = pcall(currentFS.list, path)
     if not ok or not result then
-        _G.shell.text("ERROR LISTING => " .. path .. "/ " .. tostring(result), true)
+        _G.shell.text("ERROR LISTING => " .. path .. " " .. tostring(result), true)
         computer.beep(500, 0.1)
         return nil, result
     end
@@ -83,7 +79,18 @@ function fs.list(path)
 end
 
 function fs.exists(path)
-    return realfs.exists(path)
+    local currentFS = realfs
+    local isMounted, drive, subpath = parseMountPath(path)
+
+    if isMounted then
+        local mountPath = "./mnt/"..drive:sub(1, 8)
+        if fs.mounts[mountPath] then
+            currentFS = fs.mounts[mountPath]
+            path = subpath
+        end
+    end
+
+    return path
 end
 
 function fs.isDirectory(path)
