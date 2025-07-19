@@ -22,13 +22,14 @@ function parseMountPath(path)
 end
 
 function fs.mount(mountPoint, address)
-  local ok, proxy = pcall(component.proxy, address)
+  local ok, proxy = component.proxy(address)
   if not ok or not proxy then
     _G.shell.text("Failed to mount new storage device", true)
     return false, proxy
   end
   -- Create mount directory if needed
   realfs.makeDirectory(mountPoint)
+  _G.shell.text("mountPoint", true)
   fs.mounts[mountPoint] = proxy
   return true
 end
@@ -57,6 +58,7 @@ function fs.list(path)
     local entries = {}
 
     local current_fs, newPath = setFSPath(path)
+    _G.shell.text(current_fs, true)
     current_fs = fs.mounts[current_fs]
     path = newPath
     
