@@ -37,7 +37,7 @@ command.parse = function(str)
                         _G.filesystem.directory = parts[1]
                     end
                 else
-                    dir = _G.filesystem.directory .. parts[1]
+                    dir = _G.filesystem.directory .. parts[1] .. "/"
                     if _G.filesystem.exists(dir) then
                         _G.filesystem.directory = dir
                     end
