@@ -70,7 +70,7 @@ function compAdd(addr)
 		if ctype == "filesystem" then
 			-- Mount new drive
 			local shortAddr  = addr:sub(1,8)      -- first 8 chars for readability
-			local mountPoint = "/mnt/" .. shortAddr
+			local mountPoint = "./mnt/" .. shortAddr
 			local ok, err    = _G.filesystem.mount(mountPoint, addr)
 			if not ok then
 				_G.shell.text(err, true)
@@ -87,7 +87,7 @@ function compRemove(addr)
 		if comp.address == addr then
 			if comp.ctype == "filesystem" then
 				local shortAddr  = addr:sub(1,8)      -- first 8 chars for readability
-				local mountPoint = "/mnt/" .. shortAddr
+				local mountPoint = "./mnt/" .. shortAddr
 				local ok, err    = _G.filesystem.unmount(mountPoint)
 				if not ok then
 					_G.shell.text(err, true)
