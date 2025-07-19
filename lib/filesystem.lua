@@ -15,21 +15,23 @@ function parseMountPath(path)
     -- Match against mnt pattern
     local drive, subpath = path:match("^mnt/([%w%-]+)/(.+)$")
     if drive then
-        return true, drive, "./" .. subpath
+        return true, drive, "." .. subpath
+    elseif path:match("^mnt/[%w%-]+$") then
+        drive = path:match("^mnt/([%w%-]+)$")
+        return true, drive, "."
     else
-        return false -- not a mounted path
+        return false, "<unknown>", "<unknown>"
     end
 end
 
 function fs.mount(mountPoint, address)
-  local ok, proxy = component.proxy(address)
+  local ok, proxy = pcall(component.proxy, address)
   if not ok or not proxy then
     _G.shell.text("Failed to mount new storage device", true)
     return false, proxy
   end
   -- Create mount directory if needed
   realfs.makeDirectory(mountPoint)
-  _G.shell.text("mountPoint", true)
   fs.mounts[mountPoint] = proxy
   return true
 end
@@ -46,28 +48,24 @@ end
 
 fs.makeDirectory("/mnt")
 
-function setFSPath(path)
-    local isMount, driveAddr, newPath = parseMountPath(path)
-    if isMount then
-        return "./mnt/"..driveAddr, newPath
-    end
-    return "./mnt/".._G.bootAddress, path
-end
-
 function fs.list(path)
     local entries = {}
 
-    local current_fs, newPath = setFSPath(path)
-    _G.shell.text(current_fs, true)
-    current_fs = fs.mounts[current_fs]
-    path = newPath
-    
+    local currentFS = realfs
+    local isMounted, drive, subpath = parseMountPath(path)
+    for mountPoint, proxy in pairs(fs.mounts) do
+        local address = proxy.address or "<unknown>"
+        _G.shell.text("Mount Point: " .. mountPoint .. " -> Address: " .. address, true)
+    end
+    if isMounted then
+        currentFS = fs.mounts["./mnt/"..drive]
+    end
     if type(path) ~= "string" then
         _G.shell.text("INVALID PATH" .. type(path), true)
         computer.beep(500, 0.1)
         return nil, "invalid path"
     end
-    local ok, result = pcall(current_fs.list, path)
+    local ok, result = pcall(currentFS.list, path)
     if not ok or not result then
         _G.shell.text("ERROR LISTING => " .. path .. "/ " .. tostring(result), true)
         computer.beep(500, 0.1)
