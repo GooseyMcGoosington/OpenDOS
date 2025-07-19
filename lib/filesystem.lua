@@ -17,7 +17,7 @@ end
 local function getMountProxyAndRelPath(path)
     local parts = splitPath(path)
     if parts[1] == "." and parts[2] == "mnt" and parts[3] and fs.mounts[parts[3]] then
-        local mountProxy = fs.mounts["/mnt/"..parts[3]]
+        local mountProxy = fs.mounts["/mnt/"..parts[3]:sub(1,8)]
         local relPath = table.concat({select(4, table.unpack(parts))}, "/")
         if relPath == "" then relPath = "/" end
         return mountProxy, relPath
