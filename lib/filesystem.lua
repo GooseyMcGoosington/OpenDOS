@@ -144,11 +144,12 @@ function fs.read(path, print)
 
     if isMounted then
         local mountPath = "./mnt/"..drive:sub(1, 8)
-        _G.shell.text(fs.directory, true)
+        _G.shell.text(path, true)
         if fs.mounts[mountPath] then
             currentFS = fs.mounts[mountPath]
             path = subpath:gsub("^%.", "")
         end
+        _G.shell.text(path, true)
     end
 
     if not print then
