@@ -1,206 +1,132 @@
 local fs = {}
 fs.mounts = {}
 
+-- current working directory (for relative paths)
 fs.directory = "."
+
+-- default real filesystem proxy
 local realfs = component.proxy(_G.bootAddress)
 
--- Utility to split path into components by '/'
-local function splitPath(path)
-  local parts = {}
-  for part in path:gmatch("[^/]+") do
-    table.insert(parts, part)
-  end
-  return parts
+-- helper: normalize a path to absolute
+local function normalize(path)
+    if path:sub(1,1) == "/" then
+        return path
+    elseif fs.directory == "." then
+        return path
+    else
+        return fs.directory:match("/$") and (fs.directory .. path) or (fs.directory .. "/" .. path)
+    end
 end
 
--- Helper to check if path is under a mounted path, return mount proxy and relative path if so
-local function getMountProxyAndRelPath(path)
-    local parts = splitPath(path)
-    if parts[1] == "." and parts[2] == "mnt" and parts[3] and fs.mounts[parts[3]] then
-        local mountProxy = fs.mounts["/mnt/"..parts[3]:sub(1,8)]
-        local relPath = table.concat({select(4, table.unpack(parts))}, "/")
-        if relPath == "" then relPath = "/" end
-        return mountProxy, relPath
+-- helper: resolve which filesystem to use and the subpath
+local function resolve(path)
+    local abs = normalize(path)
+    -- try longest mount points first
+    local bestMount, bestProxy
+    for mountPoint, proxy in pairs(fs.mounts) do
+        if abs:sub(1, #mountPoint) == mountPoint then
+            if not bestMount or #mountPoint > #bestMount then
+                bestMount = mountPoint
+                bestProxy = proxy
+            end
+        end
     end
-    return nil, nil
+    if bestProxy then
+        local subpath = abs:sub(#bestMount + 1)
+        if subpath == "" then subpath = "/" end
+        return bestProxy, subpath
+    end
+    return realfs, abs
 end
 
 function fs.makeDirectory(path)
-    local mountProxy, relPath = getMountProxyAndRelPath(path)
-    if mountProxy then
-        return mountProxy.makeDirectory(relPath)
-    else
-        return realfs.makeDirectory(path)
-    end
+    local proxy, p = resolve(path)
+    return proxy.makeDirectory(p)
 end
 
 function fs.mount(mountPoint, address)
-  local ok, proxy = pcall(component.proxy, address)
-  if not ok or not proxy then
-    _G.shell.text("Failed to mount new storage device", true)
-    return false, proxy
-  end
-  realfs.makeDirectory(mountPoint)
-  fs.mounts[mountPoint] = proxy
-  return true
+    local ok, proxy = pcall(component.proxy, address)
+    if not ok or not proxy then
+        _G.shell.text("Failed to mount new storage device", true)
+        return false, proxy
+    end
+    -- ensure mount root exists
+    realfs.makeDirectory(mountPoint)
+    fs.mounts[mountPoint] = proxy
+    return true
 end
 
 function fs.unmount(mountPoint)
-  local proxy = fs.mounts[mountPoint]
-  if not proxy then
-    return false, ("No filesystem mounted at %s"):format(mountPoint)
-  end
-  fs.mounts[mountPoint] = nil
-  local ok, err = pcall(realfs.remove, mountPoint)
-  return true
+    local proxy = fs.mounts[mountPoint]
+    if not proxy then
+        return false, ("No filesystem mounted at %s"):format(mountPoint)
+    end
+    fs.mounts[mountPoint] = nil
+    local ok, err = pcall(realfs.remove, mountPoint)
+    return ok, err
 end
 
-fs.makeDirectory("/mnt")
-
 function fs.list(path)
-    local mountProxy, relPath = getMountProxyAndRelPath(path)
-    local entries = {}
-
-    if mountProxy then
-        local ok, result = pcall(mountProxy.list, relPath)
-        _G.shell.text(path .. "/ " .. tostring(result), true)
-        if not ok or not result then
-            _G.shell.text("ERROR LISTING => " .. path .. "/ " .. tostring(result), true)
-            computer.beep(500, 0.1)
-            return nil, result
-        end
-        for _, name in ipairs(result) do
-            table.insert(entries, name)
-            _G.shell.text("=> " .. path .. "/" .. name, true)
-        end
-    else
-        local ok, result = pcall(realfs.list, path)
-        if not ok or not result then
-            _G.shell.text("ERROR LISTING => " .. path .. "/ " .. tostring(result), true)
-            computer.beep(500, 0.1)
-            return nil, result
-        end
-        for _, name in ipairs(result) do
-            table.insert(entries, name)
-            _G.shell.text("=> " .. path .. "/" .. name, true)
-        end
+    local proxy, p = resolve(path)
+    local ok, result = pcall(proxy.list, proxy, p)
+    if not ok or not result then
+        _G.shell.text("ERROR LISTING => " .. tostring(p) .. ": " .. tostring(result), true)
+        return nil, result
     end
-
-    if _G.package.keyboard ~= nil then
-        _G.shell.currentLine = _G.shell.currentLine + 1
-        _G.package.keyboard.getLineAsString()
+    for _, name in ipairs(result) do
+        _G.shell.text("=> " .. p .. "/" .. name, true)
     end
-    return entries
+    return result
 end
 
 function fs.exists(path)
-    local mountProxy, relPath = getMountProxyAndRelPath(path)
-    if mountProxy then
-        return mountProxy.exists(relPath)
-    else
-        return realfs.exists(path)
-    end
+    local proxy, p = resolve(path)
+    return proxy.exists(p)
 end
 
 function fs.isDirectory(path)
-    local mountProxy, relPath = getMountProxyAndRelPath(path)
-    if mountProxy then
-        return mountProxy.isDirectory(relPath)
-    else
-        return realfs.isDirectory(path)
-    end
+    local proxy, p = resolve(path)
+    return proxy.isDirectory(p)
 end
 
 function fs.size(path)
-    local mountProxy, relPath = getMountProxyAndRelPath(path)
-    if mountProxy then
-        return mountProxy.size(relPath)
-    else
-        return realfs.size(path)
-    end
+    local proxy, p = resolve(path)
+    return proxy.size(p)
 end
 
-function fs.print_file(filePath)
-    local mountProxy, relPath = getMountProxyAndRelPath(filePath)
-    local handle, reason
-    if mountProxy then
-        handle, reason = mountProxy.open(relPath)
-    else
-        handle, reason = realfs.open(filePath)
-    end
-    if not handle then
-        --_G.shell.text("Error opening file: " .. tostring(reason), true)
-        return
-    end
+function fs.open(path, mode)
+    local proxy, p = resolve(path)
+    return proxy.open(p, mode)
+end
 
-    local buffer = ""
-    repeat
-        local chunk
-        if mountProxy then
-            chunk = mountProxy.read(handle, math.huge)
-        else
-            chunk = realfs.read(handle, math.huge)
-        end
-        if chunk then buffer = buffer .. chunk end
-    until not chunk
-
-    if mountProxy then
-        mountProxy.close(handle)
-    else
-        realfs.close(handle)
+function fs.print_file(path)
+    local handle, reason = fs.open(path, "r")
+    if not handle then return end
+    while true do
+        local chunk = realfs.read(handle, math.huge)
+        if not chunk then break end
+        _G.shell.text(chunk, true)
     end
-
-    for line in buffer:gmatch("[^\r\n]+") do
-        _G.shell.text(line, true)
-    end
-    if _G.package.keyboard ~= nil then
-        _G.shell.currentLine = _G.shell.currentLine + 1
-        _G.package.keyboard.getLineAsString()
-    end
+    realfs.close(handle)
 end
 
 function fs.read(path, print)
-    local mountProxy, relPath = getMountProxyAndRelPath(path)
-
-    if mountProxy then
-        if not print then
-            local handle, reason = mountProxy.open(relPath)
-            if not handle then
-                _G.shell.text("Failed to open file on mount: " .. tostring(reason), true)
-                return nil, reason
-            else
-                local contents = ""
-                while true do
-                    local chunk = mountProxy.read(handle, math.huge)
-                    if not chunk then break end
-                    contents = contents .. chunk
-                end
-                mountProxy.close(handle)
-                return contents
-            end
-        else
-            fs.print_file(path)
-        end
-    else
-        if not print then
-            local handle, reason = realfs.open(path)
-            if not handle then
-                _G.shell.text("Failed to open file: " .. tostring(reason), true)
-                return nil, reason
-            else
-                local contents = ""
-                while true do
-                    local chunk = realfs.read(handle, math.huge)
-                    if not chunk then break end
-                    contents = contents .. chunk
-                end
-                realfs.close(handle)
-                return contents
-            end
-        else
-            fs.print_file(path)
-        end
+    if print then
+        return fs.print_file(path)
     end
+    local handle, reason = fs.open(path, "r")
+    if not handle then
+        _G.shell.text("Failed to open file: " .. tostring(reason), true)
+        return nil, reason
+    end
+    local contents = ""
+    while true do
+        local chunk = realfs.read(handle, math.huge)
+        if not chunk then break end
+        contents = contents .. chunk
+    end
+    realfs.close(handle)
+    return contents
 end
 
 return fs
