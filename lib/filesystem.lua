@@ -63,6 +63,7 @@ function fs.list(path)
 
     if mountProxy then
         local ok, result = pcall(mountProxy.list, relPath)
+        _G.shell.text(path .. "/ " .. tostring(result), true)
         if not ok or not result then
             _G.shell.text("ERROR LISTING => " .. path .. "/ " .. tostring(result), true)
             computer.beep(500, 0.1)
