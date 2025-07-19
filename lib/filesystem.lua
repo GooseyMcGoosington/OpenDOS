@@ -22,12 +22,7 @@ function parseMountPath(path)
 end
 
 function fs.parentPath(path)
-    path = path:gsub("/+$", "")
-    if path == "." then
-        return nil
-    end
-    local lastSlash = path:match("^(.*)/[^/]+$")
-    return lastSlash or "."
+    return path:match("^(.*)/[^/]*$")
 end
 
 function fs.mount(mountPoint, address)
