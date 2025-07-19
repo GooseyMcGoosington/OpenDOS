@@ -33,10 +33,10 @@ command.parse = function(str)
             if cmd == "CD" then
                 local dir = parts[1]
                 if (string.sub(parts[1], 1, 2) == "..") then
-                    _G.filesystem.directory = _G.filesystem.directory:match("^(.*)/[^/]*$")
+                    _G.filesystem.directory = _G.filesystem.directory:gsub("/$", ""):match("^(.*)/[^/]*$")
                     return
                 end
-                
+
                 if (string.sub(parts[1], 1, 2) == "./") then
                     if _G.filesystem.exists(parts[1]) then
                         _G.filesystem.directory = parts[1]
