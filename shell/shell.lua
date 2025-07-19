@@ -272,7 +272,7 @@ if success and _G.shell.fault == -1 then
 		_G.filesystem = dofile("/lib/filesystem.lua")
 		local shortAddr  = _G.bootAddress:sub(1,8)
 		local mountPoint = "./mnt/" .. shortAddr
-		local ok, err    = _G.filesystem.mount(mountPoint, addr)
+		local ok, err    = _G.filesystem.mount(mountPoint, _G.bootAddress)
 		_G.package.utility = dofile("/lib/utility.lua")
 		_G.shell.text("Loading Kernel", true)
 		_G.package.keyboard = dofile("/kernel/keyboard.lua")
