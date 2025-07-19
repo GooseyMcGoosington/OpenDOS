@@ -18,7 +18,7 @@ utility.report = function()
     _G.shell.text("SCREEN RESOLUTION: " .. tostring(_G.wh[1]) .. "x" .. tostring(_G.wh[2]), true)
     _G.shell.text("KERNEL VERSION: 1.0.0", true)
     local packages = 0
-    for i, v in ipairs(_G.package) do
+    for i, v in pairs(_G.package) do
         if (v ~= nil) then
             packages = packages + 1
         end
