@@ -23,7 +23,7 @@ utility.report = function()
             packages = packages + 1
         end
     end
-    _G.shell.text(tostring(#packages).." LOADED PACKAGES", true)
+    _G.shell.text(tostring(packages).." LOADED PACKAGES", true)
 end
 
 return utility
