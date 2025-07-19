@@ -21,10 +21,6 @@ function parseMountPath(path)
     end
 end
 
-function fs.parentPath(path)
-    return path:match("^(.*)/[^/]*$")
-end
-
 function fs.mount(mountPoint, address)
     realfs.makeDirectory(mountPoint)
     fs.mounts[mountPoint] = component.proxy(address)

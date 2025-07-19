@@ -37,7 +37,7 @@ command.parse = function(str)
                         _G.filesystem.directory = parts[1]
                     end
                 elseif (string.sub(parts[1], 1, 2) == "..") then
-                    _G.filesystem.directory = _G.filesystem.parentPath(_G.filesystem.directory)
+                    _G.filesystem.directory = _G.filesystem.directory:match("^(.*)/[^/]*$")
                 else
                     dir = _G.filesystem.directory .. parts[1] .. "/"
                     if _G.filesystem.exists(dir) then
