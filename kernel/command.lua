@@ -31,8 +31,16 @@ command.parse = function(str)
                 _G.filesystem.list(_G.filesystem.directory)
             end
             if cmd == "CD" then
-                if _G.filesystem.exists(parts[1]) then
-                    _G.filesystem.directory = parts[1]
+                local dir = parts[1]
+                if (string.sub(parts[1], 1, 2) == "./") then
+                    if _G.filesystem.exists(parts[1]) then
+                        _G.filesystem.directory = parts[1]
+                    end
+                else
+                    dir = _G.filesystem.directory .. parts[1]
+                    if _G.filesystem.exists(dir) then
+                        _G.filesystem.directory = dir
+                    end
                 end
             end
             if cmd == "READ" then
