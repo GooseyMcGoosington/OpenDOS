@@ -30,7 +30,7 @@ end
 function fs.unmount(mountPoint)
     local proxy = fs.mounts[mountPoint]
     if not proxy then
-        return false, ("No filesystem mounted at %s"):format(mountPoint)
+        return false, ("NO FILESYSTEM MOUNTED AT %s"):format(mountPoint)
     end
     fs.mounts[mountPoint] = nil
     local ok, err = pcall(realfs.remove, mountPoint)
@@ -48,7 +48,7 @@ function fs.list(path)
         local address = proxy.address or "<unknown>"
     end
     if isMounted then
-        currentFS = fs.mounts["./mnt/"..drive:sub(1, 8)]
+        currentFS = fs.mounts["./mnt/"..drive:sub(1, 8) .. "/"]
         if currentFS then
             path = subpath
         end
@@ -80,7 +80,7 @@ function fs.exists(path)
     local isMounted, drive, subpath = parseMountPath(path)
 
     if isMounted then
-        local mountPath = "./mnt/"..drive:sub(1, 8)
+        local mountPath = "./mnt/"..drive:sub(1, 8) .. "/"
         if fs.mounts[mountPath] then
             currentFS = fs.mounts[mountPath]
             path = subpath
@@ -101,15 +101,12 @@ end
 function fs.print_file(filePath)
     local currentFS = realfs
     local isMounted, drive, subpath = parseMountPath(filePath)
-    _G.shell.text("File Path is: " .. filePath .. " " .. tostring(isMounted), true)
     if isMounted then
-        local mountPath = "./mnt/"..drive:sub(1, 8)
-        _G.shell.text(mountPath, true)
+        local mountPath = "./mnt/"..drive:sub(1, 8) .. "/"
         if fs.mounts[mountPath] then
             currentFS = fs.mounts[mountPath]
             filePath = subpath
         end
-        _G.shell.text(filePath, true)
     end
 
     local handle, reason = currentFS.open(filePath)
@@ -140,19 +137,16 @@ function fs.read(path, print)
     local isMounted, drive, subpath = parseMountPath(path)
 
     if isMounted then
-        local mountPath = "./mnt/"..drive:sub(1, 8)
-        _G.shell.text(path, true)
+        local mountPath = "./mnt/"..drive:sub(1, 8) .. "/"
         if fs.mounts[mountPath] then
             currentFS = fs.mounts[mountPath]
-            path = subpath:gsub("^%.", "")
         end
-        _G.shell.text(path, true)
     end
 
     if not print then
         local handle, reason = currentFS.open(path)
         if not handle then
-            _G.shell.text("Failed to open file: " .. tostring(reason), true)
+            _G.shell.text("FAILED READ: " .. tostring(reason), true)
             return nil, reason
         else
             local contents = ""
@@ -166,10 +160,19 @@ function fs.read(path, print)
         end
     else
         local dir = path
-        if string.sub(dir, 1, 2) ~= "./" then
-            dir = fs.directory
+        if isMounted then
+            
         end
         fs.print_file(dir)
+    end
+end
+
+
+function fs.mkdir(path, name)
+    local isMounted = false
+    if (not isMounted) then
+        _G.shell.text("MKDir " .. " " .. path .. name, true)
+        realfs.makeDirectory(path .. name)
     end
 end
 

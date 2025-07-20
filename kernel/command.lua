@@ -7,7 +7,9 @@ command.cmds = {
     "HELP",
     "CLEAR",
     "LCD",
-    "REPORT"
+    "REPORT",
+    "MKDIR",
+    "RMDIR"
 }
 local function isInList(val, list)
     for _, v in ipairs(list) do
@@ -77,6 +79,21 @@ command.parse = function(str)
             end
             if cmd == "REPORT" then
                 _G.package.utility.report()
+            end
+            if cmd == "MKDIR" then
+                local dir = parts[1]
+                local dirname = parts[2]
+                -- If it starts with ./, it's absolute. Otherwise it is relative.
+                if (string.sub(dir, 1, 2) == "./") then
+                    if _G.filesystem.exists(dir) then
+                        dir = dir:gsub("/*$", "/")
+                    end
+                else
+                    dir = _G.filesystem.directory:gsub("/*$", "/") .. dir
+                    _G.filesystem.exists(dir)
+                end
+                _G.shell.text("The MKDIR Directory is: " .. dir, true)
+                _G.filesystem.mkdir(dir, dirname)
             end
         end)
         if not success then
