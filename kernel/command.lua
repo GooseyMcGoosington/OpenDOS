@@ -32,28 +32,27 @@ command.parse = function(str)
             end
             if cmd == "CD" then
                 local dir = parts[1]
-                if string.sub(dir, 1, 2) == ".." then
-                    _G.filesystem.directory = _G.filesystem.directory:gsub("/$", ""):match("^(.*)/[^/]*$")
-                    if _G.filesystem.directory == "." or _G.filesystem.directory == nil then
+                if (string.sub(dir, 1, 2) == "..") then
+                    _G.filesystem.directory = _G.filesystem.directory:gsub("/$", ""):match("^(.*)/[^/]*$"):gsub("/*$", "/")
+                    if _G.filesystem.directory == "." then
                         _G.filesystem.directory = "./"
-                    else
-                        _G.filesystem.directory = _G.filesystem.directory:gsub("/*$", "/")
-                    end
-                    return
-                end
-                local current = _G.filesystem.directory:gsub("/*$", "/")
-                if string.sub(dir, 1, 2) == "./" then
-                    if _G.filesystem.exists(dir) then
-                        _G.filesystem.directory = dir:gsub("/*$", "/")
                     end
                 else
-                    local fullPath = current .. dir
-                    if _G.filesystem.exists(fullPath) then
-                        _G.filesystem.directory = fullPath:gsub("/*$", "/")
+                    if string.sub(dir, 1, 2) == "./" then
+                        if _G.filesystem.exists(dir) then
+                            _G.filesystem.directory = dir:gsub("/*$", "/")
+                        end
+                    else
+                        dir = _G.filesystem.directory:gsub("/*$", "/") .. dir
+                        if _G.filesystem.exists(dir) then
+                            _G.filesystem.directory = dir:gsub("/*$", "/")
+                        end
                     end
                 end
+                if string.sub(_G.filesystem.directory , -1) ~= "/" then
+                    _G.filesystem.directory = _G.filesystem.directory .. "/"
+                end
             end
-
             if cmd == "READ" then
                 if _G.filesystem.exists(_G.filesystem.directory..parts[1]) then
                     _G.filesystem.read(_G.filesystem.directory..parts[1], true)

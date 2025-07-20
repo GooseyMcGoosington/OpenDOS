@@ -101,13 +101,15 @@ end
 function fs.print_file(filePath)
     local currentFS = realfs
     local isMounted, drive, subpath = parseMountPath(filePath)
-
+    _G.shell.text("File Path is: " .. filePath .. " " .. tostring(isMounted), true)
     if isMounted then
         local mountPath = "./mnt/"..drive:sub(1, 8)
+        _G.shell.text(mountPath, true)
         if fs.mounts[mountPath] then
             currentFS = fs.mounts[mountPath]
             filePath = subpath
         end
+        _G.shell.text(filePath, true)
     end
 
     local handle, reason = currentFS.open(filePath)
@@ -163,7 +165,11 @@ function fs.read(path, print)
             return contents
         end
     else
-        fs.print_file(path)
+        local dir = path
+        if string.sub(dir, 1, 2) ~= "./" then
+            dir = fs.directory
+        end
+        fs.print_file(dir)
     end
 end
 
