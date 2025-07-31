@@ -33,12 +33,17 @@ function file_editor.load(path, name)
         _G.shell.text(err, true)
         _G.package.keyboard.status = 0
     end
+    file_editor.read()
 end
 
 function file_editor.read()
     local bufferY = file_editor.lineY
     local yOffset = 0
-
+    if _G.invoke then
+        _G.shell.text("Invoke is available", true)
+    else
+        _G.shell.text("Invoke is NOT available", true)
+    end
     for sY = bufferY, bufferY + 25 do
         local line = file_editor.buffer[sY] or ""
         local i = 1
@@ -46,7 +51,9 @@ function file_editor.read()
             for x = 1, 80 do
                 local char = line:sub(i, i)
                 if char == "" then break end
-                _G.bootgpu.set(x, sY + yOffset, char)
+
+
+                _G.invoke(_G.bootgpu, "set", x, sY + yOffset, char)
                 i = i + 1
             end
             yOffset = yOffset + 1
