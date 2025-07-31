@@ -132,7 +132,7 @@ command.parse = function(str)
                     if _G.filesystem.exists(reldir) then
                        _G.package.keyboard.status = 1 -- File Editor active, keyboard disabled
                        _G.shell.text("File Editor active", true)
-                       _G.package.fileeditor.load(dir, dirname)
+                       _G.package.fileeditor.load(_G.filesystem.directory, dir)
                     end
                 end
             end

@@ -1,6 +1,7 @@
 local file_editor = {}
 file_editor.active_dir = nil
 file_editor.cursorX, file_editor.cursorY = 1, 1
+file_editor.lineY = 1;
 file_editor.maxWidth = 80
 file_editor.buffer = { "" }
 
@@ -27,14 +28,29 @@ function file_editor.load(path, name)
                 end
             end
         end
-
-        for i, line in ipairs(file_editor.buffer) do
-            _G.shell.text(line, true)
-        end
     end)
     if not success then
         _G.shell.text(err, true)
         _G.package.keyboard.status = 0
+    end
+end
+
+function file_editor.read()
+    local bufferY = file_editor.lineY
+    local yOffset = 0
+
+    for sY = bufferY, bufferY + 25 do
+        local line = file_editor.buffer[sY] or ""
+        local i = 1
+        while i <= #line do
+            for x = 1, 80 do
+                local char = line:sub(i, i)
+                if char == "" then break end
+                _G.bootgpu.set(x, sY + yOffset, char)
+                i = i + 1
+            end
+            yOffset = yOffset + 1
+        end
     end
 end
 
