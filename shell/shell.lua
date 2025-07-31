@@ -295,7 +295,7 @@ if success and _G.shell.fault == -1 then
 	end
 	-- later I want to use the highest tier graphics card
 	while true do
-		local e, addr, ascii, code = computer.pullSignal(0.05)
+		local e, addr, ascii, code, d = computer.pullSignal(0.05)
 		panicLowMem()
 		if _G.shell.fault > -1 then
 			_G.shell.panic()
@@ -310,8 +310,8 @@ if success and _G.shell.fault == -1 then
 			end
 			if _G.package.keyboard.status == 0 then
 				_G.package.keyboard.update(e, code, char, ascii)
-			else
-				_G.package.fileeditor.update(e, code, char, ascii)
+			elseif _G.package.keyboard.status > 0 then
+				_G.package.fileeditor.update(e, code, char, ascii, d)
 			end
 		end)
 		local success, msg = pcall(function()

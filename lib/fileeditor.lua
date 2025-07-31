@@ -37,33 +37,40 @@ function file_editor.load(path, name)
 end
 
 function file_editor.read()
+    _G.shell.clear(0, 0, _G.wh[1], _G.wh[2], " ")
     local bufferY = file_editor.lineY
     local yOffset = 0
-    if _G.invoke then
-        _G.shell.text("Invoke is available", true)
-    else
-        _G.shell.text("Invoke is NOT available", true)
-    end
     for sY = bufferY, bufferY + 25 do
         local line = file_editor.buffer[sY] or ""
         local i = 1
+        local x = 1
         while i <= #line do
-            for x = 1, 80 do
-                local char = line:sub(i, i)
-                if char == "" then break end
-
-
-                _G.invoke(_G.bootgpu, "set", x, sY + yOffset, char)
-                i = i + 1
+            local char = line:sub(i, i)
+            _G.invoke(_G.bootgpu, "set", x, sY + yOffset, char)
+            i = i + 1
+            x = x + 1
+            if x > 80 then
+                x = 1
+                yOffset = yOffset + 1
             end
-            yOffset = yOffset + 1
         end
+        sY = sY + 1
     end
 end
 
-function file_editor.update(e, code, char, ascii)
-    if not active_dir then return end
-    _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
+function file_editor.update(e, code, char, ascii, d)
+    _G.shell.text(e, true)
+    if e == "scroll" then
+        local direction = d
+        if (direction > 0) then
+            file_editor.lineY = file_editor.lineY - 1
+        elseif (direction < 0) then
+            file_editor.lineY = file_editor.lineY + 1
+        end
+        if file_editor.lineY < 1 then
+            file_editor.lineY = 1
+        end
+    end
 end
 
 return file_editor
