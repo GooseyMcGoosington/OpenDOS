@@ -9,7 +9,8 @@ command.cmds = {
     "LCD",
     "REPORT",
     "MKDIR",
-    "RMDIR"
+    "RMDIR",
+    "EDIT"
 }
 local function isInList(val, list)
     for _, v in ipairs(list) do
@@ -123,6 +124,8 @@ command.parse = function(str)
                         dir = dir:gsub("/*$", "/")
                         _G.package.keyboard.status = 1 -- File Editor active, keyboard disabled
                         _G.shell.text("File Editor active", true)
+                        _G.package.fileeditor.active_dir = dir
+                        _G.package.fileeditor.load(dir)
                     end
                 else
                     local reldir = _G.filesystem.directory:gsub("/*$", "/")
@@ -130,6 +133,8 @@ command.parse = function(str)
                     if _G.filesystem.exists(reldir) then
                        _G.package.keyboard.status = 1 -- File Editor active, keyboard disabled
                        _G.shell.text("File Editor active", true)
+                       _G.package.fileeditor.active_dir = dir
+                       _G.package.fileeditor.load(dir)
                     end
                 end
             end
