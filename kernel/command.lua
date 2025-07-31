@@ -124,8 +124,7 @@ command.parse = function(str)
                         dir = dir:gsub("/*$", "/")
                         _G.package.keyboard.status = 1 -- File Editor active, keyboard disabled
                         _G.shell.text("File Editor active", true)
-                        _G.package.fileeditor.active_dir = dir
-                        _G.package.fileeditor.load(dir)
+                        _G.package.fileeditor.load(dir, dirname)
                     end
                 else
                     local reldir = _G.filesystem.directory:gsub("/*$", "/")
@@ -133,8 +132,7 @@ command.parse = function(str)
                     if _G.filesystem.exists(reldir) then
                        _G.package.keyboard.status = 1 -- File Editor active, keyboard disabled
                        _G.shell.text("File Editor active", true)
-                       _G.package.fileeditor.active_dir = dir
-                       _G.package.fileeditor.load(dir)
+                       _G.package.fileeditor.load(dir, dirname)
                     end
                 end
             end
