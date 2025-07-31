@@ -12,7 +12,8 @@ _G.filesystem = nil
 _G.package = {
 	keyboard=nil,
 	command=nil,
-	utility=nil
+	utility=nil,
+	fileeditor=nil
 }
 _G.screenbuffer={}
 _G.shell.dump = "UNKNOWN ERROR REPORTED"
@@ -274,6 +275,7 @@ if success and _G.shell.fault == -1 then
 		local mountPoint = "./mnt/" .. shortAddr
 		local ok, err    = _G.filesystem.mount(mountPoint, _G.bootAddress)
 		_G.package.utility = dofile("/lib/utility.lua")
+		_G.package.fileeditor = dofile("/lib/fileeditor.lua")
 		_G.shell.text("Loading Kernel", true)
 		_G.package.keyboard = dofile("/kernel/keyboard.lua")
 		_G.package.command = dofile("/kernel/command.lua")
@@ -306,7 +308,11 @@ if success and _G.shell.fault == -1 then
 			else
 				char = ""
 			end
-			_G.package.keyboard.update(e, code, char, ascii)
+			if _G.package.keyboard.status == 0 then
+				_G.package.keyboard.update(e, code, char, ascii)
+			else
+				_G.package.fileeditor.update(e, code, char, ascii)
+			end
 		end)
 		local success, msg = pcall(function()
 			if e == "component_added" then

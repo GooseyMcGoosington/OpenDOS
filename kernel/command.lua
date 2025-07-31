@@ -87,13 +87,51 @@ command.parse = function(str)
                 if (string.sub(dir, 1, 2) == "./") then
                     if _G.filesystem.exists(dir) then
                         dir = dir:gsub("/*$", "/")
+                        _G.filesystem.mkdir(dir, dirname)
                     end
                 else
-                    dir = _G.filesystem.directory:gsub("/*$", "/") .. dir
-                    _G.filesystem.exists(dir)
+                    local reldir = _G.filesystem.directory:gsub("/*$", "/")
+                    _G.shell.text(reldir .. " " .. _G.filesystem.directory .. " " .. dir)
+                    if _G.filesystem.exists(reldir) then
+                        _G.filesystem.mkdir(_G.filesystem.directory, dir)
+                    end
                 end
-                _G.shell.text("The MKDIR Directory is: " .. dir, true)
-                _G.filesystem.mkdir(dir, dirname)
+            end
+            if cmd == "RMDIR" then
+                local dir = parts[1]
+                local dirname = parts[2]
+                -- If it starts with ./, it's absolute. Otherwise it is relative.
+                if (string.sub(dir, 1, 2) == "./") then
+                    if _G.filesystem.exists(dir) then
+                        dir = dir:gsub("/*$", "/")
+                        _G.filesystem.rmdir(dir, dirname)
+                    end
+                else
+                    local reldir = _G.filesystem.directory:gsub("/*$", "/")
+                    _G.shell.text(reldir .. " " .. _G.filesystem.directory .. " " .. dir)
+                    if _G.filesystem.exists(reldir) then
+                        _G.filesystem.rmdir(_G.filesystem.directory, dir)
+                    end
+                end
+            end
+            if cmd == "EDIT" then
+                local dir = parts[1]
+                local dirname = parts[2]
+                -- If it starts with ./, it's absolute. Otherwise it is relative.
+                if (string.sub(dir, 1, 2) == "./") then
+                    if _G.filesystem.exists(dir) then
+                        dir = dir:gsub("/*$", "/")
+                        _G.package.keyboard.status = 1 -- File Editor active, keyboard disabled
+                        _G.shell.text("File Editor active", true)
+                    end
+                else
+                    local reldir = _G.filesystem.directory:gsub("/*$", "/")
+                    _G.shell.text(reldir .. " " .. _G.filesystem.directory .. " " .. dir)
+                    if _G.filesystem.exists(reldir) then
+                       _G.package.keyboard.status = 1 -- File Editor active, keyboard disabled
+                       _G.shell.text("File Editor active", true)
+                    end
+                end
             end
         end)
         if not success then

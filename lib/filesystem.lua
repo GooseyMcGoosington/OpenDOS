@@ -169,10 +169,28 @@ end
 
 
 function fs.mkdir(path, name)
-    local isMounted = false
+    local filePath = path .. name
+    local isMounted, drive, subpath = parseMountPath(filePath)
     if (not isMounted) then
-        _G.shell.text("MKDir " .. " " .. path .. name, true)
         realfs.makeDirectory(path .. name)
+    else
+        local mountPath = "./mnt/"..drive:sub(1, 8) .. "/"
+        if fs.mounts[mountPath] then
+            fs.mounts[mountPath].makeDirectory(subpath)
+        end
+    end
+end
+
+function fs.rmdir(path, name)
+    local filePath = path .. name
+    local isMounted, drive, subpath = parseMountPath(filePath)
+    if not isMounted then
+        realfs.remove(filePath)
+    else
+        local mountPath = "./mnt/"..drive:sub(1, 8) .. "/"
+        if fs.mounts[mountPath] then
+            fs.mounts[mountPath].remove(subpath)
+        end
     end
 end
 

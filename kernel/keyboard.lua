@@ -5,6 +5,8 @@ local K = 0
 local originalChar = " "
 local lastX, lastY = 1, 2
 keyboard.locked = true
+keyboard.status = 0
+
 local cLine_string = ""
 function keyboard.getLineAsString()
     pcall(function()

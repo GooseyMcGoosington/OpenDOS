@@ -33,6 +33,7 @@ if io.read():lower() == "y" then
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/lib/filesystem.lua", path = basePath .. "/lib/filesystem.lua" },
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/shell/shell.lua", path = basePath .. "/shell/shell.lua" },
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/lib/utility.lua", path = basePath .. "/lib/utility.lua" },
+        { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/lib/fileeditor.lua", path = basePath .. "/lib/fileeditor.lua" },
       }
       
       for _, file in ipairs(files) do
