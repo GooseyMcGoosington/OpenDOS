@@ -47,17 +47,18 @@ end
 function file_editor.read()
     _G.shell.clear(0, 0, _G.wh[1], _G.wh[2], " ")
     local bufferY = file_editor.lineY
-    local yOffset = 0
-    local startLine = file_editor.lineY
-    local endLine = math.min(startLine + height - 1, #file_editor.buffer)
 
-    for sY = 0, endLine-startLine do
+    for sY = bufferY, bufferY + 24 do
         local line = file_editor.buffer[sY] or ""
         local i = 1
         local x = 1
-        _G.invoke(_G.bootgpu, "set", x, sY-bufferY, line)
-        for XX = x-1, string.len(line) do
-            _G.screenbuffer[x*_G.wh[1]+(sY-bufferY)] = line:sub(XX,XX)
+        local ly = sY-bufferY
+
+        if (ly > 1 and ly < _G.wh[2]) then
+            _G.invoke(_G.bootgpu, "set", x, ly, line)
+            for XX = x-1, string.len(line) do
+                _G.screenbuffer[x*_G.wh[1]+ly] = line:sub(XX,XX)
+            end
         end
         sY = sY + 1
     end

@@ -143,13 +143,22 @@ function _G.shell.setScreenBuffer()
 	end
 end
 function _G.shell.wipeScreenBuffer()
-	for x = 1, _G.wh[1] do
-		for y = 1, _G.wh[2] do
-			local idx = (y - 1) * _G.wh[1] + x
+	local width, height = _G.wh[1], _G.wh[2]
+	local valid = {}
+	for x = 1, width do
+		for y = 1, height do
+			local idx = (y - 1) * width + x
 			_G.screenbuffer[idx] = " "
+			valid[idx] = true -- mark as valid
+		end
+	end
+	for k in pairs(_G.screenbuffer) do
+		if not valid[k] then
+			_G.screenbuffer[k] = nil
 		end
 	end
 end
+
 function _G.shell.setColour(x, y)
 	local gpu = _G.bootgpu
 	invoke(gpu, "setForeground", x)
@@ -254,11 +263,10 @@ function vital()
 end
 function panicLowMem()
 	local used = (computer.totalMemory() - computer.freeMemory()) / computer.totalMemory()
-	if used >= 0.93 then
+	if used >= 0.96 then
 		_G.shell.fault = 2
-		_G.shell.dump = "MEMORY USAGED EXCEEDED 93%"
+		_G.shell.dump = "MEMORY USAGE TOO HIGH"
 		_G.shell.panic()
-		collectgarbage()
 	end
 end
 local success, _ = pcall(function()
