@@ -75,14 +75,8 @@ function file_editor.update(e, code, char, ascii, d)
     if K % 3 == 0 then
 
         _G.shell.setColour(0xFFFFFF, 0x0000FF)
-        _G.invoke(gpu, "set", lastX, lastY, originalChar)
         lastX = cX
         lastY = cY
-        --[[local screenChar = _G.shell.readChar(file_editor.cursorX, file_editor.cursorY)
-        originalChar = screenChar
-        _G.shell.setColour(0x000000, 0xFFFFFF)
-        _G.invoke(gpu, "set", file_editor.cursorX, file_editor.cursorY, screenChar)
-        _G.shell.setColour(0xFFFFFF, 0x0000FF)]]
     end
     K = K +1
 end
