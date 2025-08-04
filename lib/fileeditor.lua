@@ -48,7 +48,10 @@ function file_editor.read()
     _G.shell.clear(0, 0, _G.wh[1], _G.wh[2], " ")
     local bufferY = file_editor.lineY
     local yOffset = 0
-    for sY = bufferY, bufferY + 25 do
+    local startLine = file_editor.lineY
+    local endLine = math.min(startLine + height - 1, #file_editor.buffer)
+
+    for sY = 0, endLine-startLine do
         local line = file_editor.buffer[sY] or ""
         local i = 1
         local x = 1
@@ -76,9 +79,7 @@ function file_editor.update(e, code, char, ascii, d)
         if file_editor.lineY < 1 then
             file_editor.lineY = 1
         end
-        _G.gc.cg()
         file_editor.read()
-        _G.gc.cg()
     end
     if (K % 3) == 0 then
         -- set the original char
