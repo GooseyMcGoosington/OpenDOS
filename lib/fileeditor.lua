@@ -1,14 +1,14 @@
 local file_editor = {}
 file_editor.active_dir = nil
-file_editor.cursorX, file_editor.cursorY = 1, 2
+file_editor.cursorX, file_editor.cursorY = 1, 1
 file_editor.lineY = 1;
 file_editor.maxWidth = 80
 file_editor.buffer = { "" }
 
 local originalChar = nil
-local cX, cY = 1, 2
 local lastX, lastY = 1, 2
-local K = 0
+local cx, cy = 1, 2
+local K = 1
 
 function file_editor.load(path, name)
     local filePath = path .. name
@@ -53,12 +53,19 @@ function file_editor.read()
         local i = 1
         local x = 1
         _G.invoke(_G.bootgpu, "set", x, sY-bufferY, line)
+        for XX = x-1, string.len(line) do
+            _G.screenbuffer[x*_G.wh[1]+(sY-bufferY)] = line:sub(XX,XX)
+        end
         sY = sY + 1
     end
 end
 
+local gpu = _G.bootgpu
 function file_editor.update(e, code, char, ascii, d)
-    
+    originalChar = _G.shell.readChar(cx, cy)
+    _G.shell.setColour(0xFFFFFF, 0x0000FF)
+    _G.invoke(gpu, "set", cx, cy, originalChar)
+
     if e == "scroll" then
         local direction = d
         if (direction > 0) then
@@ -69,14 +76,21 @@ function file_editor.update(e, code, char, ascii, d)
         if file_editor.lineY < 1 then
             file_editor.lineY = 1
         end
+        _G.gc.cg()
         file_editor.read()
+        _G.gc.cg()
     end
-    originalChar = _G.shell.readChar(cX, cY)
-    if K % 3 == 0 then
-
+    if (K % 3) == 0 then
+        -- set the original char
         _G.shell.setColour(0xFFFFFF, 0x0000FF)
-        lastX = cX
-        lastY = cY
+        _G.invoke(gpu, "set", lastX, lastY, originalChar)
+        lastX = cx
+        lastY = cy
+        local screenChar = _G.shell.readChar(cx,cy)
+        originalChar = screenChar
+        _G.shell.setColour(0x000000, 0xFFFFFF)
+        _G.invoke(gpu, "set", cx, cy, screenChar)
+        _G.shell.setColour(0xFFFFFF, 0x0000FF)
     end
     K = K +1
 end

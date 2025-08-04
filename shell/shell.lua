@@ -15,6 +15,9 @@ _G.package = {
 	utility=nil,
 	fileeditor=nil
 }
+_G.gc = {
+	cg=collectgarbage
+}
 _G.screenbuffer={}
 _G.shell.dump = "UNKNOWN ERROR REPORTED"
 local faultCodes = {
