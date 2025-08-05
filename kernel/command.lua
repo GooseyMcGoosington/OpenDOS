@@ -2,7 +2,7 @@ local command = {}
 command.cmds = {
     "LS",
     "CD",
-    "RD",
+    "READ",
     "EXEC",
     "HELP",
     "CLS",
@@ -30,7 +30,7 @@ command.parse = function(str)
 
     if isInList(cmd, command.cmds) then
         local success, msg = pcall(function()
-            if cmd == "LIST" then
+            if cmd == "LS" then
                 _G.filesystem.list(_G.filesystem.directory)
             end
             if cmd == "CD" then
@@ -61,7 +61,7 @@ command.parse = function(str)
                     _G.filesystem.read(_G.filesystem.directory..parts[1], true)
                 end
             end
-            if cmd == "RUN" then
+            if cmd == "EXEC" then
                 if _G.filesystem.exists(_G.filesystem.directory..parts[1]) then
                     _G.shell.run(_G.filesystem.directory..parts[1])
                 end
@@ -71,17 +71,17 @@ command.parse = function(str)
                     _G.shell.text("=> ".. command, true)
                 end
             end
-            if cmd == "CLEAR" then
+            if cmd == "CLS" then
                 _G.shell.setColour(0xFFFFFF, 0x0000FF)
                 _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
             end
-            if cmd == "LCD" then
+            if cmd == "LD" then
                 _G.shell.text("=> " .. _G.filesystem.directory, true)
             end
-            if cmd == "REPORT" then
+            if cmd == "STS" then
                 _G.package.utility.report()
             end
-            if cmd == "MKDIR" then
+            if cmd == "MD" then
                 local dir = parts[1]
                 local dirname = parts[2]
                 -- If it starts with ./, it's absolute. Otherwise it is relative.
@@ -98,7 +98,7 @@ command.parse = function(str)
                     end
                 end
             end
-            if cmd == "RMDIR" then
+            if cmd == "RD" then
                 local dir = parts[1]
                 local dirname = parts[2]
                 -- If it starts with ./, it's absolute. Otherwise it is relative.
