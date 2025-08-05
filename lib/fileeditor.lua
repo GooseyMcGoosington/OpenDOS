@@ -21,7 +21,7 @@ term.ly = 0
 local ctrl=false
 
 term.blink = function()
-    local success, err = pcall(function()
+    --[[local success, err = pcall(function()
         local bufferY = file_editor.lineY-1
         if term.doBlink then
             term.state = not term.state
@@ -37,7 +37,7 @@ term.blink = function()
     end)
     if not success then
         _G.shell.text("Failed to blink terminal! CHR: "..tostring(term.char), true)
-    end
+    end]]
 end
 
 function file_editor.load(path, name)
