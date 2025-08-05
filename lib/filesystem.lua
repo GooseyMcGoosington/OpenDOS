@@ -108,12 +108,10 @@ function fs.print_file(filePath)
             filePath = subpath
         end
     end
-
     local handle, reason = currentFS.open(filePath)
     if not handle then
         return
     end
-
     local buffer = ""
     repeat
         local chunk = currentFS.read(handle, math.huge)
@@ -122,7 +120,6 @@ function fs.print_file(filePath)
         end
     until not chunk
     currentFS.close(handle)
-
     for line in buffer:gmatch("[^\r\n]+") do
         _G.shell.text(line, true)
     end
@@ -146,7 +143,7 @@ function fs.read(path, print)
     if not print then
         local handle, reason = currentFS.open(path)
         if not handle then
-            _G.shell.text("FAILED READ: " .. tostring(reason), true)
+            _G.shell.text("FAILED READ: "..reason, true)
             return nil, reason
         else
             local contents = ""
@@ -159,10 +156,6 @@ function fs.read(path, print)
             return contents
         end
     else
-        local dir = path
-        if isMounted then
-            
-        end
         fs.print_file(dir)
     end
 end
@@ -171,7 +164,6 @@ function fs.write(path, name, str)
     local currentFS = realfs
     local filePath = path .. name
     local isMounted, drive, subpath = parseMountPath(filePath)
-
     if isMounted then
         local mountPath = "./mnt/" .. drive:sub(1, 8) .. "/"
         if fs.mounts[mountPath] then
@@ -179,18 +171,8 @@ function fs.write(path, name, str)
             filePath = subpath
         end
     end
-
     local handle, reason = currentFS.open(filePath, "w")
-    if not handle then
-        return false, "Open failed: " .. tostring(reason)
-    end
-
-    local ok, werr = currentFS.write(handle, str)
-    if not ok then
-        currentFS.close(handle)
-        return false, "Write failed: " .. tostring(werr)
-    end
-
+    currentFS.write(handle, str)
     currentFS.close(handle)
     return true
 end

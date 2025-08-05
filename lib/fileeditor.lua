@@ -83,16 +83,7 @@ function file_editor.save(path, name)
             str = str .. "\n"
         end
     end
-    local success, err = pcall(function()
-        _G.filesystem.write(path, name, str)
-    end)
-
-    if not success then
-        _G.shell.text(err, true)
-        _G.package.keyboard.status = 0
-    else
-        _G.shell.text("Wrote to " .. file_editor.path .. " successfully.", true)    
-    end
+    _G.filesystem.write(path, name, str)
 end
 
 function file_editor.set_status(x, y, text)
@@ -183,9 +174,9 @@ function file_editor.update(e, code, char, ascii, d)
         if code == 0x1F and ctrl then
             -- save
             file_editor.save(file_editor.path, file_editor.name)
-            --_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
-            --file_editor.buffer = {} -- Free buffer
-            --_G.package.keyboard.status = 0 -- Keyboard active
+            _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
+            file_editor.buffer = {} -- Free buffer
+            _G.package.keyboard.status = 0 -- Keyboard active
         end
         if code == 0x11 and ctrl then
             -- close
