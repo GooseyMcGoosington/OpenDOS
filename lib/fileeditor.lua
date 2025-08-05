@@ -76,8 +76,6 @@ function file_editor.load(path, name)
 end
 
 function file_editor.save(path, name)
-    local filePath = path .. name
-
     local str = ""
     for i = 1, #file_editor.buffer do
         str = str .. file_editor.buffer[i]
@@ -92,6 +90,8 @@ function file_editor.save(path, name)
     if not success then
         _G.shell.text(err, true)
         _G.package.keyboard.status = 0
+    else
+        _G.shell.text("Wrote to " .. file_editor.path .. " successfully.", true)    
     end
 end
 

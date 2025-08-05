@@ -178,7 +178,8 @@ function fs.write(path, name, str)
         end
     end
     local handle, reason = currentFS.open(path, "w")
-    currentFS.write(handle, str)
+    handle:write(str)
+    currentFS.close(handle)
 end
 
 function fs.mkdir(path, name)
