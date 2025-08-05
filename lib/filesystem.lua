@@ -169,21 +169,7 @@ end
 
 function fs.write(path, name, str)
     local currentFS = realfs
-    local filePath = ""
-
-    if name == nil then
-        local parts = {}
-        for part in string.gmatch(path, "[^/]+") do
-            table.insert(parts, part)
-        end
-        name = table.remove(parts)
-        path = table.concat(parts, "/")
-        if path ~= "" then path = path .. "/" end
-        filePath = path .. name
-    else
-        filePath = path .. name
-    end
-
+    local filePath = path .. name
     local isMounted, drive, subpath = parseMountPath(filePath)
     if isMounted then
         local mountPath = "./mnt/" .. drive:sub(1, 8) .. "/"
@@ -192,15 +178,11 @@ function fs.write(path, name, str)
             filePath = subpath
         end
     end
-    if path and path ~= "" then
-        fs.mkdir(path, "")
-    end
     local handle, reason = currentFS.open(filePath, "w")
     currentFS.write(handle, str)
     currentFS.close(handle)
     return true
 end
-
 
 function fs.mkdir(path, name)
     local filePath = path .. name
