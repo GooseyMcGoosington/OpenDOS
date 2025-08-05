@@ -1,15 +1,15 @@
 local command = {}
 command.cmds = {
-    "LIST",
+    "LS",
     "CD",
-    "READ",
-    "RUN",
+    "RD",
+    "EXEC",
     "HELP",
-    "CLEAR",
-    "LCD",
-    "REPORT",
-    "MKDIR",
-    "RMDIR",
+    "CLS",
+    "LD",
+    "STS",
+    "MD",
+    "RD",
     "EDIT"
 }
 local function isInList(val, list)
@@ -118,11 +118,10 @@ command.parse = function(str)
             if cmd == "EDIT" then
                 local dir = parts[1]
                 local dirname = parts[2]
-                -- If it starts with ./, it's absolute. Otherwise it is relative.
                 if (string.sub(dir, 1, 2) == "./") then
                     if _G.filesystem.exists(dir) then
                         dir = dir:gsub("/*$", "/")
-                        _G.package.keyboard.status = 1 -- File Editor active, keyboard disabled
+                        _G.package.keyboard.status = 1
                         _G.shell.text("File Editor active", true)
                         _G.package.fileeditor.load(dir, dirname)
                     end

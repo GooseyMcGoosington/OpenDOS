@@ -108,10 +108,12 @@ function fs.print_file(filePath)
             filePath = subpath
         end
     end
+
     local handle, reason = currentFS.open(filePath)
     if not handle then
         return
     end
+
     local buffer = ""
     repeat
         local chunk = currentFS.read(handle, math.huge)
@@ -120,6 +122,7 @@ function fs.print_file(filePath)
         end
     until not chunk
     currentFS.close(handle)
+
     for line in buffer:gmatch("[^\r\n]+") do
         _G.shell.text(line, true)
     end
@@ -143,7 +146,7 @@ function fs.read(path, print)
     if not print then
         local handle, reason = currentFS.open(path)
         if not handle then
-            _G.shell.text("FAILED READ: "..reason, true)
+            _G.shell.text("FAILED READ: " .. tostring(reason), true)
             return nil, reason
         else
             local contents = ""
@@ -156,6 +159,10 @@ function fs.read(path, print)
             return contents
         end
     else
+        local dir = path
+        if isMounted then
+            
+        end
         fs.print_file(dir)
     end
 end
