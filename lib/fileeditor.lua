@@ -21,7 +21,18 @@ term.ly = 0
 local ctrl=false
 
 term.blink = function()
-    
+    local bufferY = file_editor.lineY-1
+    if term.doBlink then
+        term.state = not term.state
+        if term.state then
+            term.lx = file_editor.cursorX
+            term.ly = file_editor.cursorY-bufferY
+            term.char = _G.invoke(gpu, "get", term.lx, term.ly) or " "
+            _G.invoke(gpu, "set", term.lx, term.ly, "_")
+        else
+            _G.invoke(gpu, "set", term.lx, term.ly, term.char or " ")
+        end
+    end
 end
 
 function file_editor.load(path, name)
@@ -31,7 +42,6 @@ function file_editor.load(path, name)
     term.ly = 0
     term.char = " "
     term.state = true
-    term.blink = true
     ctrl = false
     file_editor.lineX = 0;
     file_editor.lineY = 1;
