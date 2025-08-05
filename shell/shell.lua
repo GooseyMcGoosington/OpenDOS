@@ -1,5 +1,6 @@
 local comp, comp_list, comp_type, invoke = component, component.list, component.type, component.invoke
 local bootAddr, shutdown, uptime, pullSignal, totalMem, freeMem, beep = computer.getBootAddress(), computer.shutdown, computer.uptime, computer.pullSignal, computer.totalMemory, computer.freeMemory, computer.beep
+local loadfile = ...
 
 _G.gpu, _G.screen, _G.components = {}, {}, {}
 _G.bootAddress, _G.bootgpu, _G.bootscreen = bootAddr, nil, nil
