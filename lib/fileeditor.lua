@@ -149,13 +149,10 @@ function file_editor.read()
             _G.invoke(gpu, "set", 1, ly, line:sub(file_editor.lineX+1, file_editor.lineX+_G.wh[1]))
         end
     end
-    _G.invoke(gpu, "set", 1, 1, "DEBUG: Finished read() subroutine")
 end
 
 function file_editor.update(e, code, char, ascii, d)
-    _G.invoke(gpu, "set", 1, 1, "Top Called")
     term.blink()
-    _G.invoke(gpu, "set", 1, 1, "0")
     if e == "scroll" then
         local direction = d
         local old = term.ly
@@ -172,7 +169,6 @@ function file_editor.update(e, code, char, ascii, d)
         end
         file_editor.read()
     end
-    _G.invoke(gpu, "set", 1, 2, "1")
     if e == "key_down" then
         if code == 0x1D then
             ctrl = true
@@ -216,7 +212,6 @@ function file_editor.update(e, code, char, ascii, d)
             ctrl=false
         end
     end
-    _G.invoke(gpu, "set", 1, 3, "2")
     if file_editor.cursorX > file_editor.lineX + _G.wh[1] then
         file_editor.lineX = file_editor.cursorX - _G.wh[1]
         file_editor.read()
@@ -225,16 +220,11 @@ function file_editor.update(e, code, char, ascii, d)
         file_editor.lineX = file_editor.cursorX - 1
         file_editor.read()
     end
-    _G.invoke(gpu, "set", 1, 4, "3")
     if file_editor.lineX < 0 then
         file_editor.lineX = 0
     end
-    _G.invoke(gpu, "set", 1, 5, "4")
-    _G.invoke(gpu, "set", 0, _G.wh[2], string.rep(" ", _G.wh[1]))
-    _G.invoke(gpu, "set", 1, 6, "5")
+    _G.invoke(gpu, "set", 1, _G.wh[2], string.rep(" ", _G.wh[1]))
     file_editor.set_status(0, _G.wh[2], "MEM: " .. tostring(computer.freeMemory()) .. " " .. "X/Y: " .. tostring(file_editor.cursorX) .. "," .. tostring(file_editor.cursorY) .. " [CTRL+S] SAVE" .. " [CTRL+W] CLOSE")
-    K = K +1
-    _G.invoke(gpu, "set", 1, 7, "Bottom Called")
 end
 
 return file_editor

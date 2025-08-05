@@ -316,11 +316,11 @@ if success and _G.shell.fault == -1 then
 			else
 				char = ""
 			end
-			--if _G.package.keyboard.status == 0 then
+			if _G.package.keyboard.status == 0 then
 				_G.package.keyboard.update(e, code, char, ascii)
-			--[[elseif _G.package.keyboard.status > 0 then
+			elseif _G.package.keyboard.status > 0 then
 				_G.package.fileeditor.update(e, code, char, ascii, d)
-			end]]
+			end
 		end)
 		local success, msg = pcall(function()
 			if e == "component_added" then
