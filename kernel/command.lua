@@ -85,7 +85,7 @@ command.parse = function(str)
             _G.filesystem.write(base, sub, "") -- create an empty file
         end
 
-        pkg.keyboard.status = 0
+        pkg.keyboard.status = 1
         pkg.fileeditor.load(base, sub)
     end
     if fs.directory:sub(-1) ~= "/" then fs.directory = fs.directory .. "/" end
