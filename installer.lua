@@ -29,6 +29,7 @@ if io.read():lower() == "y" then
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/home/hello_world.txt", path = basePath .. "/home/hello_world.txt" },
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/home/test.lua", path = basePath .. "/home/test.lua" },
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/kernel/keyboard.lua", path = basePath .. "/kernel/keyboard.lua" },
+        { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/kernel/keycodes.lua", path = basePath .. "/kernel/keycodes.lua" },
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/kernel/command.lua", path = basePath .. "/kernel/command.lua" },
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/lib/filesystem.lua", path = basePath .. "/lib/filesystem.lua" },
         { url = "https://raw.githubusercontent.com/GooseyMcGoosington/OpenDOS/main/shell/shell.lua", path = basePath .. "/shell/shell.lua" },
