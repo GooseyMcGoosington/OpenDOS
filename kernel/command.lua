@@ -1,148 +1,97 @@
 local command = {}
 command.cmds = {
-    "LS",
-    "CD",
-    "READ",
-    "EXEC",
-    "HELP",
-    "CLS",
-    "LD",
-    "STS",
-    "MD",
-    "RD",
-    "EDIT"
+  "DIR", "CD", "TYPE", "RUN", "HELP", "CLS",
+  "PWD", "STAT", "MD", "RD", "EDIT"
 }
+
 local function isInList(val, list)
-    for _, v in ipairs(list) do
-        if v == val then return true end
-    end
-    return false
+  for _, v in ipairs(list) do
+    if v == val then return true end
+  end
 end
+
+local function absPath(p)
+  return (p or ""):sub(1, 2) == "./" and p or (_G.filesystem.directory:gsub("/*$", "/") .. (p or ""))
+end
+
+local function splitPath(p1, p2)
+  return absPath(p1 or ""), p2 or ""
+end
+
 command.parse = function(str)
-    str = str:match("^%s*(.-)%s*$")
-    local parts = {}
-    for word in str:gmatch("%S+") do
-        table.insert(parts, word)
-    end
+  str = str:match("^%s*(.-)%s*$")
+  local parts = {}
+  for w in str:gmatch("%S+") do table.insert(parts, w) end
 
-    local cmd = parts[1] and string.upper(parts[1])
-    table.remove(parts, 1)
+  local cmd = parts[1] and string.upper(table.remove(parts, 1))
+  if not isInList(cmd, command.cmds) then
+    _G.shell.text("INVALID COMMAND", true)
+    return
+  end
 
-    if isInList(cmd, command.cmds) then
-        local success, msg = pcall(function()
-            if cmd == "LS" then
-                _G.filesystem.list(_G.filesystem.directory)
-            end
-            if cmd == "CD" then
-                local dir = parts[1]
-                if (string.sub(dir, 1, 2) == "..") then
-                    _G.filesystem.directory = _G.filesystem.directory:gsub("/$", ""):match("^(.*)/[^/]*$"):gsub("/*$", "/")
-                    if _G.filesystem.directory == "." then
-                        _G.filesystem.directory = "./"
-                    end
-                else
-                    if string.sub(dir, 1, 2) == "./" then
-                        if _G.filesystem.exists(dir) then
-                            _G.filesystem.directory = dir:gsub("/*$", "/")
-                        end
-                    else
-                        dir = _G.filesystem.directory:gsub("/*$", "/") .. dir
-                        if _G.filesystem.exists(dir) then
-                            _G.filesystem.directory = dir:gsub("/*$", "/")
-                        end
-                    end
-                end
-                if string.sub(_G.filesystem.directory , -1) ~= "/" then
-                    _G.filesystem.directory = _G.filesystem.directory .. "/"
-                end
-            end
-            if cmd == "READ" then
-                if _G.filesystem.exists(_G.filesystem.directory..parts[1]) then
-                    _G.filesystem.read(_G.filesystem.directory..parts[1], true)
-                end
-            end
-            if cmd == "EXEC" then
-                if _G.filesystem.exists(_G.filesystem.directory..parts[1]) then
-                    _G.shell.run(_G.filesystem.directory..parts[1])
-                end
-            end
-            if cmd == "HELP" then
-                for _, command in pairs(command.cmds) do
-                    _G.shell.text("=> ".. command, true)
-                end
-            end
-            if cmd == "CLS" then
-                _G.shell.setColour(0xFFFFFF, 0x0000FF)
-                _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
-            end
-            if cmd == "LD" then
-                _G.shell.text("=> " .. _G.filesystem.directory, true)
-            end
-            if cmd == "STS" then
-                _G.package.utility.report()
-            end
-            if cmd == "MD" then
-                local dir = parts[1]
-                local dirname = parts[2]
-                -- If it starts with ./, it's absolute. Otherwise it is relative.
-                if (string.sub(dir, 1, 2) == "./") then
-                    if _G.filesystem.exists(dir) then
-                        dir = dir:gsub("/*$", "/")
-                        _G.filesystem.mkdir(dir, dirname)
-                    end
-                else
-                    local reldir = _G.filesystem.directory:gsub("/*$", "/")
-                    _G.shell.text(reldir .. " " .. _G.filesystem.directory .. " " .. dir)
-                    if _G.filesystem.exists(reldir) then
-                        _G.filesystem.mkdir(_G.filesystem.directory, dir)
-                    end
-                end
-            end
-            if cmd == "RD" then
-                local dir = parts[1]
-                local dirname = parts[2]
-                -- If it starts with ./, it's absolute. Otherwise it is relative.
-                if (string.sub(dir, 1, 2) == "./") then
-                    if _G.filesystem.exists(dir) then
-                        dir = dir:gsub("/*$", "/")
-                        _G.filesystem.rmdir(dir, dirname)
-                    end
-                else
-                    local reldir = _G.filesystem.directory:gsub("/*$", "/")
-                    _G.shell.text(reldir .. " " .. _G.filesystem.directory .. " " .. dir)
-                    if _G.filesystem.exists(reldir) then
-                        _G.filesystem.rmdir(_G.filesystem.directory, dir)
-                    end
-                end
-            end
-            if cmd == "EDIT" then
-                local dir = parts[1]
-                local dirname = parts[2]
-                if (string.sub(dir, 1, 2) == "./") then
-                    if _G.filesystem.exists(dir) then
-                        dir = dir:gsub("/*$", "/")
-                        _G.package.keyboard.status = 1
-                        _G.shell.text("File Editor active", true)
-                        _G.package.fileeditor.load(dir, dirname)
-                    end
-                else
-                    local reldir = _G.filesystem.directory:gsub("/*$", "/")
-                    _G.shell.text(reldir .. " " .. _G.filesystem.directory .. " " .. dir)
-                    if _G.filesystem.exists(reldir) then
-                       _G.package.keyboard.status = 1 -- File Editor active, keyboard disabled
-                       _G.shell.text("File Editor active", true)
-                       _G.package.fileeditor.load(_G.filesystem.directory, dir)
-                    end
-                end
-            end
-        end)
-        if not success then
-            _G.shell.text("FATAL: PARSER FAULT", true)
-            _G.shell.text(msg, true)
+  local ok, msg = pcall(function()
+    local fs, sh, pkg = _G.filesystem, _G.shell, _G.package
+
+    if cmd == "DIR" then
+      fs.list(fs.directory)
+
+    elseif cmd == "CD" then
+      local d = parts[1]
+      if d == ".." or (d and d:sub(1, 2) == "..") then
+        fs.directory = fs.directory:gsub("/$", ""):match("^(.*)/[^/]*$"):gsub("/*$", "/")
+        if fs.directory == "." then fs.directory = "./" end
+      else
+        local full = absPath(d)
+        if fs.exists(full) then
+          fs.directory = full:gsub("/*$", "/")
         end
-    else
-        _G.shell.text("INVALID COMMAND", true)
+      end
+
+    elseif cmd == "TYPE" and parts[1] then
+      local path = absPath(parts[1])
+      if fs.exists(path) then fs.read(path, true) end
+
+    elseif cmd == "RUN" and parts[1] then
+      local path = absPath(parts[1])
+      if fs.exists(path) then sh.run(path) end
+
+    elseif cmd == "HELP" then
+      for _, c in ipairs(command.cmds) do sh.text("=> " .. c, true) end
+
+    elseif cmd == "CLS" then
+      sh.setColour(0xFFFFFF, 0x0000FF)
+      sh.clear(1, 1, _G.wh[1], _G.wh[2], " ")
+
+    elseif cmd == "PWD" then
+      sh.text("=> " .. fs.directory, true)
+
+    elseif cmd == "STAT" then
+      pkg.utility.report()
+
+    elseif cmd == "MD" then
+      local base, sub = splitPath(parts[1], parts[2])
+      if fs.exists(base) then fs.mkdir(base:gsub("/*$", "/"), sub) end
+
+    elseif cmd == "RD" then
+      local base, sub = splitPath(parts[1], parts[2])
+      if fs.exists(base) then fs.rmdir(base:gsub("/*$", "/"), sub) end
+
+    elseif cmd == "EDIT" then
+      local base, sub = splitPath(parts[1], parts[2])
+      if fs.exists(base) then
+        pkg.keyboard.status = 1
+        sh.text("File Editor active", true)
+        pkg.fileeditor.load(base:gsub("/*$", "/"), sub)
+      end
     end
+
+    if fs.directory:sub(-1) ~= "/" then fs.directory = fs.directory .. "/" end
+  end)
+
+  if not ok then
+    _G.shell.text("FATAL: PARSER FAULT", true)
+    _G.shell.text(msg, true)
+  end
 end
 
 return command
