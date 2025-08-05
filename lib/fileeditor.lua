@@ -62,7 +62,7 @@ function file_editor.load(path, name)
     file_editor.buffer = { "" }
 
     local success, err = pcall(function()
-        local str = _G.filesystem.read(file_editor.active_dir, false)
+        local str = _G.filesystem.read(file_editor.active_dir, false) or "" -- Reading may return nil if nothing exists in the file.
         for i = 1, #str do
             local c = str:sub(i, i)
 
