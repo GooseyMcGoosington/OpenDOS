@@ -185,7 +185,7 @@ function fs.write(path, name, str)
         return false, "Open failed: " .. tostring(reason)
     end
 
-    local ok, werr = handle:write(str)
+    local ok, werr = currentFS.write(handle, str)
     if not ok then
         currentFS.close(handle)
         return false, "Write failed: " .. tostring(werr)

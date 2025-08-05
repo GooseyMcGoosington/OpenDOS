@@ -156,10 +156,6 @@ function file_editor.read()
     end
 end
 
-function file_editor.save()
-    
-end
-
 local ctrl=false
 
 function file_editor.update(e, code, char, ascii, d)
