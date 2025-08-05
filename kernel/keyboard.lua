@@ -22,7 +22,7 @@ function keyboard.getLineAsString()
 end
 function keyboard.update(e, code, char, ascii)
     local gpu = _G.bootgpu
-    if e == "key_down" and code == 28 then
+    if e == "key_down" and code == 28 then -- enter
         keyboard.getLineAsString()
         _G.package.command.parse(cLine_string)
         _G.shell.currentLine = _G.shell.currentLine + 1
@@ -30,7 +30,7 @@ function keyboard.update(e, code, char, ascii)
         keyboard.x = 1
         return
     end
-    if e == "key_down" and code == 14 then
+    if e == "key_down" and code == 14 then -- backspace
         if keyboard.x > 1 then
             lastX = keyboard.x
             lastY = keyboard.y

@@ -1,6 +1,8 @@
+local gpu = _G.bootgpu
 local file_editor = {}
 file_editor.active_dir = nil
 file_editor.cursorX, file_editor.cursorY = 1, 1
+file_editor.lineX = 0;
 file_editor.lineY = 1;
 file_editor.maxWidth = 80
 file_editor.buffer = { "" }
@@ -10,28 +12,51 @@ local lastX, lastY = 1, 2
 local cx, cy = 1, 2
 local K = 1
 
+local term = {}
+term.doBlink = true
+term.state = true -- false for lastChar, true for blink
+term.char = " "
+term.lx = 0
+term.ly = 0
+
+term.blink = function()
+    local bufferY = file_editor.lineY-1
+    if term.doBlink then
+        term.state = not term.state
+        if term.state then
+            term.lx = file_editor.cursorX
+            term.ly = file_editor.cursorY-bufferY
+            term.char = _G.invoke(gpu, "get", term.lx, term.ly)
+            _G.invoke(gpu, "set", term.lx, term.ly, "_")
+        else
+            _G.invoke(gpu, "set", term.lx, term.ly, term.char)
+        end
+    end
+end
+
 function file_editor.load(path, name)
     local filePath = path .. name
     file_editor.active_dir = filePath
+
     local oldCX = file_editor.cursorX
     local oldCY = file_editor.cursorY
+
+    file_editor.buffer = { "" }
+    file_editor.cursorX = 1
+    file_editor.cursorY = 1
+
     local success, err = pcall(function()
         local str = _G.filesystem.read(file_editor.active_dir, false)
-            for i = 1, #str do
+        for i = 1, #str do
             local c = str:sub(i, i)
+
             if c == "\n" then
                 file_editor.cursorY = file_editor.cursorY + 1
                 file_editor.cursorX = 1
-                table.insert(file_editor.buffer, "")
+                file_editor.buffer[file_editor.cursorY] = ""
             else
                 file_editor.buffer[file_editor.cursorY] = file_editor.buffer[file_editor.cursorY] .. c
                 file_editor.cursorX = file_editor.cursorX + 1
-
-                if file_editor.cursorX > file_editor.maxWidth then
-                    file_editor.cursorY = file_editor.cursorY + 1
-                    file_editor.cursorX = 1
-                    table.insert(file_editor.buffer, "")
-                end
             end
         end
     end)
@@ -41,59 +66,149 @@ function file_editor.load(path, name)
     end
     file_editor.cursorX = oldCX
     file_editor.cursorY = oldCY
+    _G.shell.clear(0, 0, _G.wh[1], _G.wh[2], " ")
     file_editor.read()
+end
+
+
+function file_editor.set_status(x, y, text)
+    _G.invoke(gpu, "set", x, y, text)
+end
+
+function file_editor.insert_char(value)
+    local bufferY = file_editor.lineY - 1
+    local y = file_editor.cursorY
+    local x = file_editor.cursorX
+
+    file_editor.buffer[y] = file_editor.buffer[y] or ""
+    local line = file_editor.buffer[y]
+    if #line < x - 1 then
+        line = line .. (" "):rep(x - 1 - #line)
+    end
+
+    local before = line:sub(1, x - 1)
+    local after = line:sub(x)
+    file_editor.buffer[y] = before .. value .. after
+    file_editor.cursorX = file_editor.cursorX + 1
+    _G.invoke(gpu, "set", 1 - file_editor.lineX, y-(file_editor.lineY-1), file_editor.buffer[y])
+    term.state = false
+    term.blink()
+end
+
+
+function file_editor.delete_char()
+    local bufferY = file_editor.lineY-1
+    
+    local y = file_editor.cursorY
+    local x = file_editor.cursorX
+
+    file_editor.buffer[y] = file_editor.buffer[y] or ""
+    local line = file_editor.buffer[y]
+    local before = line:sub(1, x - 2) or ""
+    local after = line:sub(x) or ""
+    file_editor.cursorX = file_editor.cursorX - 1
+    file_editor.cursorX = math.max(1, x - 1)
+    file_editor.buffer[y] = before .. after
+    -- draw line
+    _G.invoke(gpu, "set", 1-file_editor.lineX, y-(file_editor.lineY-1), string.rep(" ", _G.wh[1])) -- clear the line first
+    _G.invoke(gpu, "set", 1-file_editor.lineX, y-(file_editor.lineY-1), file_editor.buffer[y])
+    term.state = false
+    term.blink()
 end
 
 function file_editor.read()
     _G.shell.clear(0, 0, _G.wh[1], _G.wh[2], " ")
-    local bufferY = file_editor.lineY
+    local bufferY = file_editor.lineY-1
 
     for sY = bufferY, bufferY + 24 do
         local line = file_editor.buffer[sY] or ""
         local i = 1
-        local x = 1
+        local x = 1-file_editor.lineX
         local ly = sY-bufferY
 
-        if (ly > 1 and ly < _G.wh[2]) then
-            _G.invoke(_G.bootgpu, "set", x, ly, line)
-            for XX = x-1, string.len(line) do
-                _G.screenbuffer[x*_G.wh[1]+ly] = line:sub(XX,XX)
-            end
+        if (ly > 0 and ly < _G.wh[2]) then
+            _G.invoke(gpu, "set", 1, ly, line:sub(file_editor.lineX+1, file_editor.lineX+_G.wh[1]))
         end
-        sY = sY + 1
     end
 end
 
-local gpu = _G.bootgpu
-function file_editor.update(e, code, char, ascii, d)
-    originalChar = _G.shell.readChar(cx, cy)
-    _G.shell.setColour(0xFFFFFF, 0x0000FF)
-    _G.invoke(gpu, "set", cx, cy, originalChar)
+function file_editor.save()
+    
+end
 
+local ctrl=false
+
+function file_editor.update(e, code, char, ascii, d)
+    term.blink()
     if e == "scroll" then
         local direction = d
+        local old = term.ly
         if (direction > 0) then
-            file_editor.lineY = file_editor.lineY - 1
+            file_editor.lineY = file_editor.lineY - 5
+            term.ly = term.ly + 1
         elseif (direction < 0) then
-            file_editor.lineY = file_editor.lineY + 1
+            file_editor.lineY = file_editor.lineY + 5
+            term.ly = term.ly - 1
         end
         if file_editor.lineY < 1 then
             file_editor.lineY = 1
+            term.ly = old
         end
         file_editor.read()
     end
-    if (K % 3) == 0 then
-        -- set the original char
-        _G.shell.setColour(0xFFFFFF, 0x0000FF)
-        _G.invoke(gpu, "set", lastX, lastY, originalChar)
-        lastX = cx
-        lastY = cy
-        local screenChar = _G.shell.readChar(cx,cy)
-        originalChar = screenChar
-        _G.shell.setColour(0x000000, 0xFFFFFF)
-        _G.invoke(gpu, "set", cx, cy, screenChar)
-        _G.shell.setColour(0xFFFFFF, 0x0000FF)
+    if e == "key_down" then
+        if code == 0x1D then
+            ctrl = true
+        end
+        if code == 0x1F and ctrl then
+            -- save
+            
+        end
+        if code == 0x11 and ctrl then
+            -- close
+            _G.shell.clear(0, 0, _G.wh[1], _G.wh[2], " ")
+            file_editor.buffer = {} -- Free buffer
+            _G.package.keyboard.status = 0 -- Keyboard active
+        end
+        if ascii >= 32 and ascii <= 126 then
+            file_editor.insert_char(char)
+        end
+        if code == 14 then
+            file_editor.delete_char()
+        elseif code == 203 then
+            file_editor.cursorX = file_editor.cursorX - 1
+        elseif code == 205 then
+            file_editor.cursorX = file_editor.cursorX + 1
+        elseif code == 0xC8 then
+            file_editor.cursorY = file_editor.cursorY - 1
+        elseif code == 0xD0 then
+            file_editor.cursorY = file_editor.cursorY + 1
+        end
+        if (file_editor.cursorX < 0) then
+            file_editor.cursorX = 0
+        end
+        if (file_editor.cursorY < 0) then
+            file_editor.cursorY = 0
+        end
     end
+    if e == "key_up" then
+        if code == 0x1D then
+            ctrl=false
+        end
+    end
+    if file_editor.cursorX > file_editor.lineX + _G.wh[1] then
+        file_editor.lineX = file_editor.cursorX - _G.wh[1]
+        file_editor.read()
+    end
+    if file_editor.cursorX < file_editor.lineX then
+        file_editor.lineX = file_editor.cursorX - 1
+        file_editor.read()
+    end
+    if file_editor.lineX < 0 then
+        file_editor.lineX = 0
+    end
+    _G.invoke(gpu, "set", 0, _G.wh[2], string.rep(" ", _G.wh[1]))
+    file_editor.set_status(0, _G.wh[2], "MEM: " .. tostring(computer.freeMemory()) .. " " .. "X/Y: " .. tostring(file_editor.cursorX) .. "," .. tostring(file_editor.cursorY) .. " [CTRL+S] SAVE" .. " [CTRL+W] CLOSE")
     K = K +1
 end
 
