@@ -79,11 +79,13 @@ command.parse = function(str)
     elseif cmd == "EDIT" then
         local base, sub = splitPath(parts[1], parts[2])
         base = base:gsub("/*$", "/")
+        _G.shell.text(base, true)
+        _G.shell.text(sub, true)
         if not fs.exists(base .. sub) then
             _G.filesystem.write(base, sub, "") -- create an empty file
         end
 
-        pkg.keyboard.status = 1
+        pkg.keyboard.status = 0
         pkg.fileeditor.load(base, sub)
     end
     if fs.directory:sub(-1) ~= "/" then fs.directory = fs.directory .. "/" end
