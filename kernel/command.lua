@@ -80,7 +80,6 @@ command.parse = function(str)
       local base, sub = splitPath(parts[1], parts[2])
       if fs.exists(base) then
         pkg.keyboard.status = 1
-        sh.text("File Editor active", true)
         pkg.fileeditor.load(base:gsub("/*$", "/"), sub)
       end
     end

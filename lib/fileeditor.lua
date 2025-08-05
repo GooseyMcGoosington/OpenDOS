@@ -21,6 +21,7 @@ term.state = true -- false for lastChar, true for blink
 term.char = " "
 term.lx = 0
 term.ly = 0
+local ctrl=false
 
 term.blink = function()
     local bufferY = file_editor.lineY-1
@@ -38,6 +39,15 @@ term.blink = function()
 end
 
 function file_editor.load(path, name)
+    file_editor.cursorX = 1
+    file_editor.cursorY = 1
+    term.lx = 1
+    term.ly = 1
+    term.char = " "
+    term.state = true
+    term.blink = true
+    ctrl = false
+
     local filePath = path .. name
     file_editor.active_dir = filePath
     file_editor.path=path
@@ -77,12 +87,15 @@ end
 
 function file_editor.save(path, name)
     local str = ""
-    for i = 1, #file_editor.buffer do
-        str = str .. file_editor.buffer[i]
-        if i < #file_editor.buffer then
+    local maxLine = math.max(#file_editor.buffer, file_editor.cursorY)
+
+    for i = 1, maxLine do
+        str = str .. (file_editor.buffer[i] or "")
+        if i < maxLine then
             str = str .. "\n"
         end
     end
+
     _G.filesystem.write(path, name, str)
 end
 
@@ -146,8 +159,6 @@ function file_editor.read()
         end
     end
 end
-
-local ctrl=false
 
 function file_editor.update(e, code, char, ascii, d)
     term.blink()
