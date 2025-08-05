@@ -342,7 +342,6 @@ if success and _G.shell.fault == -1 then
 		panicLowMem()
 	end
 else
-	_G.shell.sleep(0.1)
 	computer.beep(500, 0.05)
 	computer.beep(500, 0.05)
 	computer.beep(500, 0.05)
