@@ -77,13 +77,15 @@ command.parse = function(str)
       if fs.exists(base) then fs.rmdir(base:gsub("/*$", "/"), sub) end
 
     elseif cmd == "EDIT" then
-      local base, sub = splitPath(parts[1], parts[2])
-      if fs.exists(base) then
-        pkg.keyboard.status = 1
-        pkg.fileeditor.load(base:gsub("/*$", "/"), sub)
-      end
-    end
+        local base, sub = splitPath(parts[1], parts[2])
+        base = base:gsub("/*$", "/")
+        if not fs.exists(base .. sub) then
+            _G.filesystem.write(base, sub, "") -- create an empty file
+        end
 
+        pkg.keyboard.status = 1
+        pkg.fileeditor.load(base, sub)
+    end
     if fs.directory:sub(-1) ~= "/" then fs.directory = fs.directory .. "/" end
   end)
 

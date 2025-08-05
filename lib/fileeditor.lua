@@ -55,10 +55,7 @@ function file_editor.load(path, name)
 
     local oldCX = file_editor.cursorX
     local oldCY = file_editor.cursorY
-
     file_editor.buffer = { "" }
-    file_editor.cursorX = 1
-    file_editor.cursorY = 1
 
     local success, err = pcall(function()
         local str = _G.filesystem.read(file_editor.active_dir, false)
@@ -79,8 +76,14 @@ function file_editor.load(path, name)
         _G.shell.text(err, true)
         _G.package.keyboard.status = 0
     end
-    file_editor.cursorX = oldCX
-    file_editor.cursorY = oldCY
+    if #file_editor.buffer == 0 then
+        file_editor.buffer[1] = ""
+        file_editor.cursorX = 1
+        file_editor.cursorY = 1
+    else
+        file_editor.cursorX = oldCX
+        file_editor.cursorY = oldCY
+    end
     _G.shell.clear(0, 0, _G.wh[1], _G.wh[2], " ")
     file_editor.read()
 end
