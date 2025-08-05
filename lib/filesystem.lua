@@ -167,6 +167,19 @@ function fs.read(path, print)
     end
 end
 
+function fs.write(path, name, str)
+    local currentFS = realfs
+    local isMounted, drive, subpath = parseMountPath(path)
+
+    if isMounted then
+        local mountPath = "./mnt/"..drive:sub(1, 8) .. "/"
+        if fs.mounts[mountPath] then
+            currentFS = fs.mounts[mountPath]
+        end
+    end
+    local handle, reason = currentFS.open(path, "w")
+    currentFS.write(handle, str)
+end
 
 function fs.mkdir(path, name)
     local filePath = path .. name

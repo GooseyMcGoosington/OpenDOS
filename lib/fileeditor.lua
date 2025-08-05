@@ -7,6 +7,9 @@ file_editor.lineY = 1;
 file_editor.maxWidth = 80
 file_editor.buffer = { "" }
 
+file_editor.path = ""
+file_editor.name = ""
+
 local originalChar = nil
 local lastX, lastY = 1, 2
 local cx, cy = 1, 2
@@ -37,6 +40,8 @@ end
 function file_editor.load(path, name)
     local filePath = path .. name
     file_editor.active_dir = filePath
+    file_editor.path=path
+    file_editor.name=name
 
     local oldCX = file_editor.cursorX
     local oldCY = file_editor.cursorY
@@ -70,6 +75,25 @@ function file_editor.load(path, name)
     file_editor.read()
 end
 
+function file_editor.save(path, name)
+    local filePath = path .. name
+
+    local str = ""
+    for i = 1, #file_editor.buffer do
+        str = str .. file_editor.buffer[i]
+        if i < #file_editor.buffer then
+            str = str .. "\n"
+        end
+    end
+    local success, err = pcall(function()
+        _G.filesystem.write(path, name, str)
+    end)
+
+    if not success then
+        _G.shell.text(err, true)
+        _G.package.keyboard.status = 0
+    end
+end
 
 function file_editor.set_status(x, y, text)
     _G.invoke(gpu, "set", x, y, text)
@@ -162,11 +186,14 @@ function file_editor.update(e, code, char, ascii, d)
         end
         if code == 0x1F and ctrl then
             -- save
-            
+            file_editor.save(file_editor.path, file_editor.name)
+            _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
+            file_editor.buffer = {} -- Free buffer
+            _G.package.keyboard.status = 0 -- Keyboard active
         end
         if code == 0x11 and ctrl then
             -- close
-            _G.shell.clear(0, 0, _G.wh[1], _G.wh[2], " ")
+            _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
             file_editor.buffer = {} -- Free buffer
             _G.package.keyboard.status = 0 -- Keyboard active
         end
