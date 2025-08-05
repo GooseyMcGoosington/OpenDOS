@@ -21,23 +21,7 @@ term.ly = 0
 local ctrl=false
 
 term.blink = function()
-    --[[local success, err = pcall(function()
-        local bufferY = file_editor.lineY-1
-        if term.doBlink then
-            term.state = not term.state
-            if term.state then
-                term.lx = file_editor.cursorX
-                term.ly = file_editor.cursorY-bufferY
-                term.char = _G.invoke(gpu, "get", term.lx, term.ly) or " "
-                _G.invoke(gpu, "set", term.lx, term.ly, "_")
-            else
-                _G.invoke(gpu, "set", term.lx, term.ly, term.char or " ")
-            end
-        end
-    end)
-    if not success then
-        _G.shell.text("Failed to blink terminal! CHR: "..tostring(term.char), true)
-    end]]
+    
 end
 
 function file_editor.load(path, name)
