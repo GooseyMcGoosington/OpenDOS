@@ -187,9 +187,9 @@ function file_editor.update(e, code, char, ascii, d)
         if code == 0x1F and ctrl then
             -- save
             file_editor.save(file_editor.path, file_editor.name)
-            _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
-            file_editor.buffer = {} -- Free buffer
-            _G.package.keyboard.status = 0 -- Keyboard active
+            --_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
+            --file_editor.buffer = {} -- Free buffer
+            --_G.package.keyboard.status = 0 -- Keyboard active
         end
         if code == 0x11 and ctrl then
             -- close

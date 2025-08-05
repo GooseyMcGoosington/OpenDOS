@@ -169,17 +169,30 @@ end
 
 function fs.write(path, name, str)
     local currentFS = realfs
-    local isMounted, drive, subpath = parseMountPath(path)
+    local filePath = path .. name
+    local isMounted, drive, subpath = parseMountPath(filePath)
 
     if isMounted then
-        local mountPath = "./mnt/"..drive:sub(1, 8) .. "/"
+        local mountPath = "./mnt/" .. drive:sub(1, 8) .. "/"
         if fs.mounts[mountPath] then
             currentFS = fs.mounts[mountPath]
+            filePath = subpath
         end
     end
-    local handle, reason = currentFS.open(path, "w")
-    handle:write(str)
+
+    local handle, reason = currentFS.open(filePath, "w")
+    if not handle then
+        return false, "Open failed: " .. tostring(reason)
+    end
+
+    local ok, werr = handle:write(str)
+    if not ok then
+        currentFS.close(handle)
+        return false, "Write failed: " .. tostring(werr)
+    end
+
     currentFS.close(handle)
+    return true
 end
 
 function fs.mkdir(path, name)
