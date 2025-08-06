@@ -172,8 +172,9 @@ function fs.write(path, name, str)
     local currentFS = realfs
     local filePath = path .. name
     local isMounted, drive, subpath = parseMountPath(filePath)
+    local mountPath = ""
     if isMounted then
-        local mountPath = "./mnt/" .. drive:sub(1, 8) .. "/"
+        mountPath = "./mnt/" .. drive:sub(1, 8) .. "/"
         if fs.mounts[mountPath] then
             currentFS = fs.mounts[mountPath]
             filePath = subpath
@@ -181,6 +182,7 @@ function fs.write(path, name, str)
     end
     _G.shell.text(str, true)
     _G.shell.text(filePath, true)
+    _G.shell.text(mountPath, true)
     local handle, reason = currentFS.open(filePath, "w")
     currentFS.write(handle, str)
     currentFS.close(handle)

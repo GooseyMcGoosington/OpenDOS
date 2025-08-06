@@ -210,6 +210,7 @@ function file_editor.update(e, code, char, ascii, d)
         end
         if code == keycodes.s and ctrl then
             -- save
+            _G.shell.text(file_editor.active_dir, true)
             file_editor.save(file_editor.path, file_editor.name)
             --_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
             --file_editor.buffer = {} -- Free buffer
