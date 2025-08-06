@@ -54,8 +54,8 @@ function file_editor.load(path, name)
 
     if isMounted then
         local mountPath = "./mnt/"..drive:sub(1, 8) .. "/"
-        if _G.filesystem.fs.mounts[mountPath] then
-            currentFS = _G.filesystem.fs.mounts[mountPath]
+        if _G.filesystem.mounts[mountPath] then
+            currentFS = _G.filesystem.mounts[mountPath]
             path = subpath
         end
     end
@@ -211,9 +211,9 @@ function file_editor.update(e, code, char, ascii, d)
         if code == keycodes.s and ctrl then
             -- save
             file_editor.save(file_editor.path, file_editor.name)
-            _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
-            file_editor.buffer = {} -- Free buffer
-            _G.package.keyboard.status = 0 -- Keyboard active
+            --_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
+            --file_editor.buffer = {} -- Free buffer
+            --_G.package.keyboard.status = 0 -- Keyboard active
         end
         if code == keycodes.w and ctrl then
             -- close
