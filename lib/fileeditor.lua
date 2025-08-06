@@ -48,6 +48,18 @@ function file_editor.load(path, name)
     file_editor.lineX = 0;
     file_editor.lineY = 1;
     local filePath = path .. name
+    -- check if mounted
+    local currentFS = _G.filesystem.realfs
+    local isMounted, drive, subpath = _G.filesystem.parseMountPath(path)
+
+    if isMounted then
+        local mountPath = "./mnt/"..drive:sub(1, 8) .. "/"
+        if _G.filesystem.fs.mounts[mountPath] then
+            currentFS = _G.filesystem.fs.mounts[mountPath]
+            path = subpath
+        end
+    end
+    --
     file_editor.active_dir = filePath
     file_editor.path=path
     file_editor.name=name
@@ -149,10 +161,6 @@ function file_editor.delete_char()
         local after = line:sub(x)
         file_editor.buffer[y] = before .. after
         file_editor.cursorX = x - 1
-    else
-        if (file_editor.buffer[y-1]) then
-           file_editor.cursorX = #file_editor.buffer[y-1]+1
-        end
     end
     file_editor.cursorX = math.max(1, file_editor.cursorX)
     _G.invoke(gpu, "set", 1 - file_editor.lineX, y - bufferY, string.rep(" ", _G.wh[1]))

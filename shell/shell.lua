@@ -295,7 +295,6 @@ if success and _G.shell.fault == -1 then
 		_G.shell.dump = msg
 	else
 		_G.shell.text("Finished Loading Software", true)
-		_G.shell.sleep(1)
 		_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
 		_G.filesystem.directory = "./home/"
 		_G.filesystem.read(_G.filesystem.directory.."/hello_world.txt", true)

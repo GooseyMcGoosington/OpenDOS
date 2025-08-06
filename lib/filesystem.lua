@@ -1,6 +1,5 @@
 local fs = {}
 fs.mounts = {}
-
 fs.directory = "."
 local realfs = component.proxy(_G.bootAddress)
 
@@ -21,6 +20,8 @@ function parseMountPath(path)
     end
 end
 
+fs.parseMountPath=parseMountPath
+fs.realfs=realfs
 function fs.mount(mountPoint, address)
     realfs.makeDirectory(mountPoint)
     fs.mounts[mountPoint] = component.proxy(address)
