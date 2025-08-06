@@ -1,5 +1,5 @@
 local gpu = _G.bootgpu
-local keycodes = _G.package.keycodes
+local keycodes = _G.package.keycodes.keys
 
 local file_editor = {}
 file_editor.active_dir = nil
