@@ -86,7 +86,7 @@ command.parse = function(str)
         end
 
         pkg.keyboard.status = 1
-        pkg.fileeditor.load(base, sub)
+        --pkg.fileeditor.load(base, sub)
     end
     if fs.directory:sub(-1) ~= "/" then fs.directory = fs.directory .. "/" end
   end)
