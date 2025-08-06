@@ -1,6 +1,4 @@
 local gpu = _G.bootgpu
-local keycodes = _G.package.keycodes.keys
-
 local file_editor = {}
 file_editor.active_dir = nil
 file_editor.cursorX, file_editor.cursorY = 1, 1
@@ -47,13 +45,16 @@ function file_editor.load(path, name)
     ctrl = false
     file_editor.lineX = 0;
     file_editor.lineY = 1;
+
     local filePath = path .. name
     file_editor.active_dir = filePath
     file_editor.path=path
     file_editor.name=name
+
     local oldCX = file_editor.cursorX
     local oldCY = file_editor.cursorY
     file_editor.buffer = { "" }
+
     local success, err = pcall(function()
         local str = _G.filesystem.read(file_editor.active_dir, false) or "" -- Reading may return nil if nothing exists in the file.
         for i = 1, #str do
@@ -88,12 +89,14 @@ end
 function file_editor.save(path, name)
     local str = ""
     local maxLine = math.max(#file_editor.buffer, file_editor.cursorY)
+
     for i = 1, maxLine do
         str = str .. (file_editor.buffer[i] or "")
         if i < maxLine then
             str = str .. "\n"
         end
     end
+
     _G.filesystem.write(path, name, str)
 end
 
@@ -105,11 +108,13 @@ function file_editor.insert_char(value)
     local bufferY = file_editor.lineY - 1
     local y = file_editor.cursorY
     local x = file_editor.cursorX
+
     file_editor.buffer[y] = file_editor.buffer[y] or ""
     local line = file_editor.buffer[y]
     if #line < x - 1 then
         line = line .. (" "):rep(x - 1 - #line)
     end
+
     local before = line:sub(1, x - 1)
     local after = line:sub(x)
     file_editor.buffer[y] = before .. value .. after
@@ -119,49 +124,31 @@ function file_editor.insert_char(value)
     term.blink()
 end
 
-function file_editor.enter()
-    local y = file_editor.cursorY
-    local x = file_editor.cursorX
-    file_editor.buffer[y] = file_editor.buffer[y] or ""
-    local line = file_editor.buffer[y]
-    local before = line:sub(1, x - 1)
-    local after = line:sub(x)
-    for i = #file_editor.buffer, y + 1, -1 do
-        file_editor.buffer[i + 1] = file_editor.buffer[i]
-    end
-    file_editor.buffer[y] = before
-    file_editor.buffer[y + 1] = after
-    file_editor.cursorY = y + 1
-    file_editor.cursorX = 1
-    file_editor.read()
-    term.state = false
-    term.blink()
-end
 
 function file_editor.delete_char()
-    local bufferY = file_editor.lineY - 1
+    local bufferY = file_editor.lineY-1
+    
     local y = file_editor.cursorY
     local x = file_editor.cursorX
+
     file_editor.buffer[y] = file_editor.buffer[y] or ""
     local line = file_editor.buffer[y]
-    if x > 1 then
-        local before = line:sub(1, x - 2)
-        local after = line:sub(x)
-        file_editor.buffer[y] = before .. after
-        file_editor.cursorX = x - 1
-    end
-    file_editor.cursorX = math.max(1, file_editor.cursorX)
-    _G.invoke(gpu, "set", 1 - file_editor.lineX, y - bufferY, string.rep(" ", _G.wh[1]))
-    _G.invoke(gpu, "set", 1 - file_editor.lineX, y - bufferY, file_editor.buffer[y])
-
+    local before = line:sub(1, x - 2) or ""
+    local after = line:sub(x) or ""
+    file_editor.cursorX = file_editor.cursorX - 1
+    file_editor.cursorX = math.max(1, x - 1)
+    file_editor.buffer[y] = before .. after
+    -- draw line
+    _G.invoke(gpu, "set", 1-file_editor.lineX, y-(file_editor.lineY-1), string.rep(" ", _G.wh[1])) -- clear the line first
+    _G.invoke(gpu, "set", 1-file_editor.lineX, y-(file_editor.lineY-1), file_editor.buffer[y])
     term.state = false
     term.blink()
 end
-
 
 function file_editor.read()
     _G.shell.clear(0, 0, _G.wh[1], _G.wh[2], " ")
     local bufferY = file_editor.lineY-1
+
     for sY = bufferY, bufferY + 24 do
         local line = file_editor.buffer[sY] or ""
         local i = 1
@@ -193,37 +180,34 @@ function file_editor.update(e, code, char, ascii, d)
         file_editor.read()
     end
     if e == "key_down" then
-        if code == keycodes.lcontrol then
+        if code == 0x1D then
             ctrl = true
         end
-        if code == keycodes.s and ctrl then
+        if code == 0x1F and ctrl then
             -- save
             file_editor.save(file_editor.path, file_editor.name)
             _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
             file_editor.buffer = {} -- Free buffer
             _G.package.keyboard.status = 0 -- Keyboard active
         end
-        if code == keycodes.w and ctrl then
+        if code == 0x11 and ctrl then
             -- close
             _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
             file_editor.buffer = {} -- Free buffer
             _G.package.keyboard.status = 0 -- Keyboard active
         end
-        if code == keycodes.enter then -- Enter
-            file_editor.enter()
-        end
         if ascii >= 32 and ascii <= 126 then
             file_editor.insert_char(char)
         end
-        if code == keycodes.back then
+        if code == 14 then
             file_editor.delete_char()
-        elseif code == keycodes.left then
+        elseif code == 203 then
             file_editor.cursorX = file_editor.cursorX - 1
-        elseif code == keycodes.right then
+        elseif code == 205 then
             file_editor.cursorX = file_editor.cursorX + 1
-        elseif code == keycodes.up then
+        elseif code == 0xC8 then
             file_editor.cursorY = file_editor.cursorY - 1
-        elseif code == keycodes.down then
+        elseif code == 0xD0 then
             file_editor.cursorY = file_editor.cursorY + 1
         end
         if (file_editor.cursorX < 0) then
@@ -234,7 +218,7 @@ function file_editor.update(e, code, char, ascii, d)
         end
     end
     if e == "key_up" then
-        if code == keycodes.lcontrol then
+        if code == 0x1D then
             ctrl=false
         end
     end
