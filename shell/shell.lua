@@ -285,6 +285,7 @@ if success and _G.shell.fault == -1 then
 		_G.package.utility = dofile("/lib/utility.lua")
 		_G.package.fileeditor = dofile("/lib/fileeditor.lua")
 		_G.shell.text("Loading Kernel", true)
+		_G.package.keycodes = dofile("/kernel/keycodes.lua")
 		_G.package.keyboard = dofile("/kernel/keyboard.lua")
 		_G.package.command = dofile("/kernel/command.lua")
 	end)

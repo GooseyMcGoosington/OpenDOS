@@ -1,4 +1,6 @@
 local gpu = _G.bootgpu
+local keycodes = _G.keycodes
+
 local file_editor = {}
 file_editor.active_dir = nil
 file_editor.cursorX, file_editor.cursorY = 1, 1
@@ -124,6 +126,31 @@ function file_editor.insert_char(value)
     term.blink()
 end
 
+function file_editor.enter()
+    local y = file_editor.cursorY
+    local x = file_editor.cursorX
+
+    file_editor.buffer[y] = file_editor.buffer[y] or ""
+    local line = file_editor.buffer[y]
+
+    local before = line:sub(1, x - 1)
+    local after = line:sub(x)
+
+    for i = #file_editor.buffer, y + 1, -1 do
+        file_editor.buffer[i + 1] = file_editor.buffer[i]
+    end
+
+    file_editor.buffer[y] = before
+    file_editor.buffer[y + 1] = after
+
+    file_editor.cursorY = y + 1
+    file_editor.cursorX = 1
+
+    file_editor.read()
+    term.state = false
+    term.blink()
+end
+
 
 function file_editor.delete_char()
     local bufferY = file_editor.lineY-1
@@ -180,34 +207,37 @@ function file_editor.update(e, code, char, ascii, d)
         file_editor.read()
     end
     if e == "key_down" then
-        if code == 0x1D then
+        if code == keycodes.lcontrol then
             ctrl = true
         end
-        if code == 0x1F and ctrl then
+        if code == keycodes.s and ctrl then
             -- save
             file_editor.save(file_editor.path, file_editor.name)
             _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
             file_editor.buffer = {} -- Free buffer
             _G.package.keyboard.status = 0 -- Keyboard active
         end
-        if code == 0x11 and ctrl then
+        if code == keycodes.w and ctrl then
             -- close
             _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
             file_editor.buffer = {} -- Free buffer
             _G.package.keyboard.status = 0 -- Keyboard active
         end
+        if code == keycodes.enter then -- Enter
+            file_editor.enter()
+        end
         if ascii >= 32 and ascii <= 126 then
             file_editor.insert_char(char)
         end
-        if code == 14 then
+        if code == keycodes.back then
             file_editor.delete_char()
-        elseif code == 203 then
+        elseif code == keycodes.left then
             file_editor.cursorX = file_editor.cursorX - 1
-        elseif code == 205 then
+        elseif code == keycodes.right then
             file_editor.cursorX = file_editor.cursorX + 1
-        elseif code == 0xC8 then
+        elseif code == keycodes.up then
             file_editor.cursorY = file_editor.cursorY - 1
-        elseif code == 0xD0 then
+        elseif code == keycodes.down then
             file_editor.cursorY = file_editor.cursorY + 1
         end
         if (file_editor.cursorX < 0) then
@@ -218,7 +248,7 @@ function file_editor.update(e, code, char, ascii, d)
         end
     end
     if e == "key_up" then
-        if code == 0x1D then
+        if code == keycodes.lcontrol then
             ctrl=false
         end
     end
