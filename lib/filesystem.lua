@@ -180,9 +180,6 @@ function fs.write(path, name, str)
             filePath = subpath
         end
     end
-    _G.shell.text(str, true)
-    _G.shell.text(filePath, true)
-    _G.shell.text(mountPath, true)
     local handle, reason = currentFS.open(filePath, "w")
     currentFS.write(handle, str)
     currentFS.close(handle)
