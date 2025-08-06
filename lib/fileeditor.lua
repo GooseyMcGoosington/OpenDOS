@@ -149,6 +149,10 @@ function file_editor.delete_char()
         local after = line:sub(x)
         file_editor.buffer[y] = before .. after
         file_editor.cursorX = x - 1
+    else
+        if (file_editor.buffer[y-1]) then
+           file_editor.cursorX = #file_editor.buffer[y-1]+1
+        end
     end
     file_editor.cursorX = math.max(1, file_editor.cursorX)
     _G.invoke(gpu, "set", 1 - file_editor.lineX, y - bufferY, string.rep(" ", _G.wh[1]))
