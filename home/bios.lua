@@ -54,7 +54,7 @@ inv(gpu, "setResolution", inv(gpu, "maxResolution"))
 local w, h = inv(gpu, "getResolution")
 local function clr()
 	inv(gpu, "setForeground", 0xFFFFFF)
-	inv(gpu, "setBackground", 0x0000FF)
+	inv(gpu, "setBackground", 0x000000)
 	inv(gpu, "fill", 1, 1, w, h, " ")	
 end
 local w2 = w/2
@@ -79,7 +79,7 @@ local function isFloppy(a)
 end
 
 local function dMu()
-	setClr(0x000000, 0x0000FF)
+	setClr(0xFFFFFF, 0x000000)
 	txt("BOOT MENU", 2)
 	txt("SELECT DISK", 3)
 	txt("BOOTABLE DISKS: " .. #boot, 4)
@@ -87,9 +87,9 @@ local function dMu()
 
 	for i, a in pairs(boot) do
 		if i == dsl then
-			setClr(0x000000, 0xFFFFFF)
+			setClr(0xFFFFFF, 0x000000)
 		else
-			setClr(0x000000, 0x0000FF)
+			setClr(0xFFFFFF, 0x000000)
 		end
 		local raw = component.type(a)
 		local diskType = "DISK"

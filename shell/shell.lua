@@ -278,6 +278,7 @@ local success, _ = pcall(function()
 end)
 if success and _G.shell.fault == -1 then
 	computer.beep(1500, 0.1)
+	_G.shell.setColour(_G.colours.fg, _G.colours.bg)
 	_G.shell.text("Basic System Checks OK.", true)
 	_G.shell.text("Please wait.", true)
 	local success, msg = pcall(function()
