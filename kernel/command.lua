@@ -59,7 +59,7 @@ command.parse = function(str)
       for _, c in ipairs(command.cmds) do sh.text("=> " .. c, true) end
 
     elseif cmd == "CLS" then
-      sh.setColour(0xFFFFFF, 0x0000FF)
+      sh.setColour(_G.colours.bg, _G.colours.fg)
       sh.clear(1, 1, _G.wh[1], _G.wh[2], " ")
 
     elseif cmd == "PWD" then
