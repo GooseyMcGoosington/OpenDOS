@@ -15,6 +15,10 @@ _G.package = {
 	utility=nil,
 	fileeditor=nil
 }
+_G.colours={
+	bg=0x000000; -- background
+	fg=0xFFFFFF; -- text, etc
+}
 
 _G.screenbuffer={}
 _G.shell.dump = "UNKNOWN ERROR REPORTED"
@@ -172,7 +176,7 @@ function _G.shell.text(str, setColour)
 	local x = 1
 	local y = _G.shell.currentLine + 1
 	if setColour then
-		_G.shell.setColour(0xFFFFFF, 0x0000FF)
+		_G.shell.setColour(_G.colours.fg, _G.colours.bg)
 	end
 	invoke(_G.bootgpu, "set", x, y, str)
 	for i = 1, #str do
@@ -226,7 +230,7 @@ function _G.shell.sleep(seconds)
 	until computer.uptime() >= deadline
   end
 function _G.shell.panic()
-	_G.shell.setColour(0xFFFFFF, 0xFF0000)
+	_G.shell.setColour(_G.colours.fg, _G.colours.bg)
 	_G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
 	_G.shell.text(faultCodes[_G.shell.fault], false)
 	_G.shell.text("Panic triggered.", false)
@@ -247,7 +251,7 @@ function _G.shell.run(path, ...)
     return true, result
 end
 function clr()
-	_G.shell.setColour(0x000000, 0x0000FF)
+	_G.shell.setColour(_G.colours.bg, _G.colours.fg)
 end
 function vital()
 	_G.bootgpu = component.list("gpu")()
@@ -337,7 +341,7 @@ if success and _G.shell.fault == -1 then
 			_G.shell.panic()
 		end
 		if _G.shell.currentLine >= _G.wh[2] then
-			_G.shell.setColour(0xFFFFFF, 0x0000FF)
+			_G.shell.setColour(_G.colours.fg, _G.colours.bg)
             _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
         end
 		panicLowMem()

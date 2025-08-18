@@ -141,6 +141,7 @@ function fs.read(path, print)
         local mountPath = "./mnt/"..drive:sub(1, 8) .. "/"
         if fs.mounts[mountPath] then
             currentFS = fs.mounts[mountPath]
+            path = subpath
         end
     end
 

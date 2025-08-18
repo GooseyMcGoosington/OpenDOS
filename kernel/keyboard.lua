@@ -37,7 +37,7 @@ function keyboard.update(e, code, char, ascii)
             keyboard.x = keyboard.x - 1
             local idx = (keyboard.y - 1) * _G.wh[1] + keyboard.x
             _G.screenbuffer[idx] = " "
-            _G.shell.setColour(0xFFFFFF, 0x0000FF)
+            _G.shell.setColour(_G.colours.fg, _G.colours.bg)
             _G.invoke(gpu, "set", keyboard.x, keyboard.y, " ")
             return
         end
@@ -45,7 +45,7 @@ function keyboard.update(e, code, char, ascii)
     keyboard.x = math.max(1, math.min(keyboard.x, _G.wh[1]))
     keyboard.y = math.max(1, math.min(keyboard.y, _G.wh[2]))
     originalChar = _G.shell.readChar(keyboard.x, keyboard.y)
-    _G.shell.setColour(0xFFFFFF, 0x0000FF)
+    _G.shell.setColour(_G.colours.fg, _G.colours.bg)
     _G.invoke(gpu, "set", keyboard.x, keyboard.y, originalChar)
 
     if K % 3 == 0 then
@@ -64,20 +64,20 @@ function keyboard.update(e, code, char, ascii)
             -- Stay on current input line
             keyboard.y = _G.shell.currentLine
         end
-        _G.shell.setColour(0xFFFFFF, 0x0000FF)
+        _G.shell.setColour(_G.colours.fg, _G.colours.bg)
         _G.invoke(gpu, "set", lastX, lastY, originalChar)
         lastX = keyboard.x
         lastY = keyboard.y
         local screenChar = _G.shell.readChar(keyboard.x, keyboard.y)
         originalChar = screenChar
-        _G.shell.setColour(0x000000, 0xFFFFFF)
+        _G.shell.setColour(_G.colours.bg, _G.colours.fg)
         _G.invoke(gpu, "set", keyboard.x, keyboard.y, screenChar)
-        _G.shell.setColour(0xFFFFFF, 0x0000FF)
+        _G.shell.setColour(_G.colours.fg, _G.colours.bg)
     end
     -- be able to write to the screen buffer
     if char and e == "key_down" then
         if ascii >= 32 and ascii <= 126 then
-            _G.shell.setColour(0xFFFFFF, 0x0000FF)
+            _G.shell.setColour(_G.colours.fg, _G.colours.bg)
             _G.invoke(gpu, "set", keyboard.x, keyboard.y, char)
             if _G.screenbuffer then
                 local idx = (keyboard.y - 1) * _G.wh[1] + keyboard.x
