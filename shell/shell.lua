@@ -72,7 +72,6 @@ function compAdd(addr)
 	elseif ctype == "screen" then
 		table.insert(_G.screen, {address=addr, ctype=ctype})
 	else
-		_G.shell.text(ctype, true)
 		if ctype == "filesystem" then
 			local shortAddr  = addr:sub(1,8)
 			local mountPoint = "./mnt/" .. shortAddr .. "/"
@@ -80,7 +79,7 @@ function compAdd(addr)
 			if not ok then
 				_G.shell.text(err, true)
 			else
-				_G.shell.text("Mounted new drive at " .. mountPoint, true)
+				_G.shell.text("MOUNTED " .. mountPoint, true)
 			end
 			_G.shell.currentLine = _G.shell.currentLine + 1
 		end
@@ -97,7 +96,7 @@ function compRemove(addr)
 				if not ok then
 					_G.shell.text(err, true)
 				else
-					_G.shell.text("Unmounted drive at " .. mountPoint, true)
+					_G.shell.text("UNMOUNTED " .. mountPoint, true)
 				end
 				_G.shell.currentLine = _G.shell.currentLine + 1
 				if (_G.bootAddress == addr) then

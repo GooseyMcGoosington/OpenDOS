@@ -61,7 +61,8 @@ command.parse = function(str)
     elseif cmd == "CLS" then
       sh.setColour(_G.colours.fg, _G.colours.bg)
       sh.clear(1, 1, _G.wh[1], _G.wh[2], " ")
-
+      sh.currentLine = 1
+      
     elseif cmd == "PWD" then
       sh.text("=> " .. fs.directory, true)
 
