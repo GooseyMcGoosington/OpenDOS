@@ -136,7 +136,8 @@ end
 function fs.read(path, print)
     local currentFS = realfs
     local isMounted, drive, subpath = parseMountPath(path)
-
+    local originalPath = path
+    
     if isMounted then
         local mountPath = "./mnt/"..drive:sub(1, 8) .. "/"
         if fs.mounts[mountPath] then
@@ -161,7 +162,7 @@ function fs.read(path, print)
             return contents
         end
     else
-        local dir = path
+        local dir = originalPath
         if isMounted then
             
         end

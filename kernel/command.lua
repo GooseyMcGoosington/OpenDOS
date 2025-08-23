@@ -56,7 +56,7 @@ command.parse = function(str)
       if fs.exists(path) then sh.run(path) end
 
     elseif cmd == "HELP" then
-      for _, c in ipairs(command.cmds) do sh.text("=> " .. c, true) end
+      for _, c in ipairs(command.cmds) do sh.text("> " .. c, true) end
 
     elseif cmd == "CLS" then
       sh.setColour(_G.colours.fg, _G.colours.bg)
@@ -64,7 +64,7 @@ command.parse = function(str)
       sh.currentLine = 1
       
     elseif cmd == "PWD" then
-      sh.text("=> " .. fs.directory, true)
+      sh.text(fs.directory .. ":/>", true)
 
     elseif cmd == "STAT" then
       pkg.utility.report()
