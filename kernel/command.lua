@@ -64,7 +64,7 @@ command.parse = function(str)
       sh.currentLine = 1
       
     elseif cmd == "PWD" then
-      sh.text(fs.directory .. ":/>", true)
+      sh.text("> " .. fs.directory, true)
 
     elseif cmd == "STAT" then
       pkg.utility.report()

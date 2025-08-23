@@ -46,7 +46,7 @@ function fs.list(path)
     local currentFS = realfs
     local isMounted, drive, subpath = parseMountPath(path)
     for mountPoint, proxy in pairs(fs.mounts) do
-        local address = proxy.address or "<unknown>"
+        local address = proxy.address or "<UNKNOWN>"
     end
     if isMounted then
         currentFS = fs.mounts["./mnt/"..drive:sub(1, 8) .. "/"]
@@ -61,13 +61,13 @@ function fs.list(path)
     end
     local ok, result = pcall(currentFS.list, path)
     if not ok or not result then
-        _G.shell.text("ERROR LISTING => " .. path .. " " .. tostring(result), true)
+        _G.shell.text("FAILED LISTING > " .. path .. " " .. tostring(result), true)
         computer.beep(500, 0.1)
         return nil, result
     end
     for _, name in ipairs(result) do
         table.insert(entries, name)
-        _G.shell.text("=> " .. path .. name, true)
+        _G.shell.text("> " .. path .. name, true)
     end
     if _G.package.keyboard ~= nil then
         _G.shell.currentLine = _G.shell.currentLine + 1
