@@ -220,6 +220,7 @@ function file_editor.update(e, code, char, ascii, d)
             _G.shell.clear(1, 1, _G.wh[1], _G.wh[2], " ")
             file_editor.buffer = {} -- Free buffer
             _G.package.keyboard.status = 0 -- Keyboard active
+            return
         end
         if code == keycodes.enter then -- Enter
             file_editor.enter()
